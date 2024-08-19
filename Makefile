@@ -3,4 +3,4 @@ TARGET = knife
 
 install:
 	$(CARGO) build --release
-	mv ~/.knife/build/target/releases/knife ~/.knife/bin/
+	mv ~/.knife/build/target/release/knife ~/.knife/bin/
