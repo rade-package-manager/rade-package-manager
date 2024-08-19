@@ -143,8 +143,7 @@ Error");
                 std::process::exit(1);
             }
             println!("ok");
-            print!("makeing...");
-            io::stdout().flush().unwrap();
+            println!("makeing {}", home.join(".knife/build").display());
             let status = std::process::Command::new("make")
                 .current_dir(home.join(".knife/build"))
                 .status()
@@ -163,7 +162,7 @@ Error");
             let bin = home.join(".knife/bin/");
             let target = home.join(".knife/build/target/release/knife");
             if let Err(ere) = fs::rename(target, bin) {
-                eprintln!("{}","Error: Failed to move Knife to bin.\nPlease report this issue to the Knife repository".red());
+                eprintln!("{}{}","Error: Failed to move Knife to bin.\nPlease report this issue to the Knife repository\nError code: ".red(),ere);
                 std::process::exit(1);
             }
             println!("ok");
