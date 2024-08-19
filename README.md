@@ -21,7 +21,11 @@ curl -sSf https://17do.github.io/knife-installer.github.io/sh.install.html | sh
 
 ## Usage
 
-- **Install a package**: 
+
+>[!WARNING]
+>Since Knife is still under development, the install command has not been implemented yet.<br>
+>Please wait for a while
+- **Install a package**:
   ```bash
   knife install <program>
   ```
