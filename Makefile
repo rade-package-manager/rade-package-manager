@@ -1,6 +1,6 @@
 CARGO = cargo
 TARGET = knife
 
-install: $(TARGET)
+install:
 	$(CARGO) build --release
 	mv ~/.knife/build/target/releases/knife ~/.knife/bin/
