@@ -1,10 +1,10 @@
 #![allow(warnings)]
 use colored::*;
+use dirs::home_dir;
 use git2::Repository;
 use std::env;
 use std::fs;
 use std::io;
-use std::os::unix::process;
 
 struct Gitl {
     clone: bool,
@@ -29,18 +29,26 @@ impl Gitl {
     }
     pub fn update_package_list() {
         let url = "https://github.com/17do/knife-package-list";
-        let path = "~/.knife/packagelist";
+        let home = match home_dir() {
+            Some(path) => path,
+            None => {
+                eprintln!("Failed to obtain home directory.\nPlease report this issue to the Knife repository along with the operating system used.
+Error");
+                std::process::exit(1);
+            }
+        };
+        let path = home.join(".knife/packagelist");
         // remove the packagelist
         println!("updateing package list..");
-        println!("removing {}..", path);
-        if let Err(er) = fs::remove_dir_all(path) {
+        println!("removing {}..", path.display());
+        if let Err(er) = fs::remove_dir_all(&path) {
             eprintln!("{}{}", "Could not delete directory.\n Please report this issue to the Knife repository\n Error code: ".red(),er);
             std::process::exit(1);
         }
 
         // clone the packagelist
         println!("cloning {}", url);
-        if let Err(error) = Repository::clone(url, path) {
+        if let Err(error) = Repository::clone(url, &path) {
             eprintln!("{}{}","Failed to retrieve package list.\nPlease submit this issue to the Knife repository.\nError code:".red(),error);
             std::process::exit(1);
         }
