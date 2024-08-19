@@ -145,27 +145,18 @@ Error");
             println!("ok");
             println!("makeing {}", home.join(".knife/build").display());
             let status = std::process::Command::new("make")
-                .current_dir(home.join(".knife/build"))
+               .current_dir(home.join(".knife/build"))
                 .status()
-                .expect("failed to execute make.");
+               .expect("failed to execute make.");
             if status.success() {
                 println!("ok");
             } else {
                 eprintln!(
-                    "{}",
-                    "Error: Make failed. Please report this issue to the Knife repository"
+                  "{}",
+                  "Error: Make failed. Please report this issue to the Knife repository"
                 );
-                std::process::exit(1);
+              std::process::exit(1);
             }
-            print!("moveing to .knife/bin...");
-            io::stdout().flush().unwrap();
-            let bin = home.join(".knife/bin/");
-            let target = home.join(".knife/build/target/release/knife");
-            if let Err(ere) = fs::rename(target, bin) {
-                eprintln!("{}{}","Error: Failed to move Knife to bin.\nPlease report this issue to the Knife repository\nError code: ".red(),ere);
-                std::process::exit(1);
-            }
-            println!("ok");
             println!("{}", "All done!".green().bold());
             println!("{}","Knife has been successfully upgraded. Please see the Knife repository for details on the update.".yellow());
             std::process::exit(0);
