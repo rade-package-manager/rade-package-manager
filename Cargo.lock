@@ -73,7 +73,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "knife-package-manager"
+name = "knife"
 version = "0.1.0"
 dependencies = [
  "colored",

@@ -1,5 +1,5 @@
 [package]
-name = "knife-package-manager"
+name = "knife"
 version = "0.1.0"
 edition = "2021"
 
