@@ -5,63 +5,18 @@ use git2::Repository;
 use std::env;
 use std::fs;
 use std::io;
-
-struct Gitl {
-    clone: bool,
-    get_list: String,
-}
-
-impl Gitl {
-    pub fn load_list() {
-        match fs::read_dir("~/.knife/packagelist") {
-            Ok(dir) => {}
-            Err(_) => {
-                eprintln!(
-                    "{}{}{}{}{}",
-                    "--Error--\n".red().bold(),
-                    "Failed to retrieve package list.\n".red().bold(),
-                    "please run ".red().bold(),
-                    "knife update ".cyan(),
-                    "to retrieve package list".red().bold()
-                )
-            }
-        }
-    }
-    pub fn update_package_list() {
-        let url = "https://github.com/17do/knife-package-list";
-        let home = match home_dir() {
-            Some(path) => path,
-            None => {
-                eprintln!("Failed to obtain home directory.\nPlease report this issue to the Knife repository along with the operating system used.
-Error");
-                std::process::exit(1);
-            }
-        };
-        let path = home.join(".knife/packagelist");
-        // remove the packagelist
-        println!("updateing package list..");
-        println!("removing {}..", path.display());
-        if let Err(er) = fs::remove_dir_all(&path) {
-            eprintln!("{}{}", "Could not delete directory.\n Please report this issue to the Knife repository\n Error code: ".red(),er);
-            std::process::exit(1);
-        }
-
-        // clone the packagelist
-        println!("cloning {}", url);
-        if let Err(error) = Repository::clone(url, &path) {
-            eprintln!("{}{}","Failed to retrieve package list.\nPlease submit this issue to the Knife repository.\nError code:".red(),error);
-            std::process::exit(1);
-        }
-        println!("{}", "Successfully updated package list!");
-    }
-}
+mod gitl;
+mod info;
 
 fn main() {
+    let version = info::VERSION;
     let _args: Vec<String> = env::args().collect();
     if _args.len() > 1 {
         if _args[1] == "update" {
-            Gitl::update_package_list();
+            gitl::Gitl::update_package_list();
             std::process::exit(0);
+        } else if _args[1] == "upgrade" {
+            gitl::Gitl::upgrade_knife(version);
         }
     } else {
         println!(

@@ -1,5 +1,5 @@
 CARGO = cargo
-TARGET = knife
+
 
 install:
 	$(CARGO) build --release
