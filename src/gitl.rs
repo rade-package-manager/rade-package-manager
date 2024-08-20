@@ -14,23 +14,6 @@ pub struct Gitl {
 }
 
 impl Gitl {
-    // load package list
-    pub fn load_list() {
-        match fs::read_dir("~/.knife/packagelist") {
-            Ok(dir) => {}
-            Err(_) => {
-                eprintln!(
-                    "{}{}{}{}{}",
-                    "--Error--\n".red().bold(),
-                    "Failed to retrieve package list.\n".red().bold(),
-                    "please run ".red().bold(),
-                    "knife update ".cyan(),
-                    "to retrieve package list".red().bold()
-                )
-            }
-        }
-    }
-
     // update knife package list
     pub fn update_package_list() {
         let url = "https://github.com/17do/knife-package-list";
@@ -145,17 +128,17 @@ Error");
             println!("ok");
             println!("makeing {}", home.join(".knife/build").display());
             let status = std::process::Command::new("make")
-               .current_dir(home.join(".knife/build"))
+                .current_dir(home.join(".knife/build"))
                 .status()
-               .expect("failed to execute make.");
+                .expect("failed to execute make.");
             if status.success() {
                 println!("ok");
             } else {
                 eprintln!(
-                  "{}",
-                  "Error: Make failed. Please report this issue to the Knife repository"
+                    "{}",
+                    "Error: Make failed. Please report this issue to the Knife repository"
                 );
-              std::process::exit(1);
+                std::process::exit(1);
             }
             println!("{}", "All done!".green().bold());
             println!("{}","Knife has been successfully upgraded. Please see the Knife repository for details on the update.".yellow());
