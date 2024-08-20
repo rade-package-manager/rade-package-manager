@@ -3,11 +3,11 @@ use dirs::home_dir;
 use git2::Repository;
 use std::env;
 use std::ffi::OsStr;
-use std::fmt::Debug;
-use std::fmt::Display;
 use std::fs;
 use std::io;
+use std::io::Read;
 use std::path::Path;
+use std::path::PathBuf;
 
 pub struct Get {}
 
@@ -39,18 +39,16 @@ impl Get {
                 if entry.file_name().to_string_lossy() == program {
                     found = true;
                     let target = entry.path();
-                    println!("Program found: {:?}", target);
-
                     if target.is_dir() {
                         match fs::read_dir(&target) {
                             Ok(files) => {
                                 for file in files {
                                     if let Ok(file) = file {
-                                        println!("  {:?}", file.path());
+                                        self::Get::is_repositry(file.path());
                                     }
                                 }
                             }
-                            Err(e) => println!("Error reading directory contents: {}", e),
+                            Err(e) => println!("Error reading directory contents: {e}"),
                         }
                     } else {
                         println!("  (Not a directory)");
@@ -63,6 +61,18 @@ impl Get {
 
         if !found {
             println!("Program not found: {}", program);
+        }
+    }
+
+    fn is_repositry(i: PathBuf) -> String {
+        let mut content = String::new();
+        if let Ok(mut o) = fs::File::open(&i) {
+            o.read_to_string(&mut content)
+                .expect("Failed to read file.")
+                .to_string()
+        } else {
+            eprintln!("{}failed to open file:{}", "Error".red(), i.display());
+            return "Error".to_string();
         }
     }
 }
