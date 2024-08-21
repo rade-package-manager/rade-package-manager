@@ -45,6 +45,7 @@ impl Get {
                                 for file in files {
                                     if let Ok(file) = file {
                                         self::Get::is_repositry(file.path());
+                                        println!("{:?}",file.path());
                                     }
                                 }
                             }
