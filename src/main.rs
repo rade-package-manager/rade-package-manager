@@ -7,9 +7,8 @@ use std::fs;
 use std::io;
 mod gitl;
 mod info;
-mod install;
-mod search;
 use clap::{Arg, Command};
+mod search;
 
 fn main() {
     let version = info::VERSION;
@@ -29,31 +28,17 @@ fn main() {
         )
         .get_matches();
 
-<<<<<<< Updated upstream
-    match matches.get_one::<String>("command").unwrap().as_str() {
-        "update" => {
+    match matches.subcommand() {
+        Some(("update", _)) => {
             gitl::update_package_list();
             std::process::exit(0);
         }
-        "upgrade" => {
-            gitl::upgrade_knife(version);
-        }
-        "install" => {
-            if let Some(package) = matches.get_one::<String>("package") {
-                install::install_program(&package.to_string());
-=======
-    match matches.subcommand() {
-        Some(("update", _)) => {
-            gitl::Gitl::update_package_list();
-            std::process::exit(0);
-        }
         Some(("upgrade", _)) => {
-            gitl::Gitl::upgrade_knife(version);
+            gitl::upgrade_knife(version);
         }
         Some(("install", sub_matches)) => {
             if let Some(package) = sub_matches.get_one::<String>("package") {
-                install::get::search_program(package.to_string());
->>>>>>> Stashed changes
+                search::search_program(&package.to_string());
             } else {
                 eprintln!("{} Specify the package to install", "Error:".red());
             }
