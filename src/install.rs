@@ -24,87 +24,32 @@ pub fn install(program: &String) {
         let capacity = format!("{}{}", basepath, "/capacity");
         let version = format!("{}{}", basepath, "/version");
 
-        let mut depen: String = match File::open(dependencies) {
-            Ok(mut o) => {
-                let mut dependen = String::new();
-                o.read_to_string(&mut dependen)
-                    .expect("failed to read file");
-                dependen
-            }
-            Err(r) => {
-                eprintln!("{}{}", "Error".red(), ": Failed to get dependencies.");
-                eprintln!("Please report this issue to the knife repository.");
-                eprintln!("Error code: {}", r);
-                std::process::exit(1);
-            }
+        let throw_error = |r| {
+            eprintln!("{}{}", "Error".red(), ": Failed to get dependencies.");
+            eprintln!("Please report this issue to the knife repository.");
+            eprintln!("Error code: {}", r);
+            std::process::exit(1);
         };
+
+        let mut depen: String = fs::read_to_string(dependencies).unwrap_or_else(throw_error);
 
         // get language
-        let lang: String = match File::open(language.trim()) {
-            Ok(mut o) => {
-                let mut lag = String::new();
-                o.read_to_string(&mut lag)
-                    .expect("failed to read language.");
-                lag
-            }
-            Err(e) => {
-                eprintln!("{}{}", "Error".red(), ": Failed to get language.");
-                eprintln!("Please report this issue to the knife repository.");
-                eprintln!("Error code: {}", e);
-                std::process::exit(1);
-            }
-        };
-        // get repository
-        let github: String = match File::open(repository) {
-            Ok(mut r) => {
-                let mut repo = String::new();
-                r.read_to_string(&mut repo)
-                    .expect("Failed to read repository");
-                repo
-            }
-            Err(e) => {
-                eprintln!("{}{}", "Error".red(), ": Failed to get repository.");
-                eprintln!("Please report this issue to the knife repository.");
-                eprintln!("Error code: {}", e);
-                std::process::exit(1);
-            }
-        };
-        let capa: String = match File::open(capacity) {
-            Ok(mut f) => {
-                let mut capa = String::new();
-                f.read_to_string(&mut capa)
-                    .expect("Failed to read capacity");
-                capa
-            }
-            Err(e) => {
-                eprintln!("{}{}", "Error".red(), ": Failed to get capacity.");
-                eprintln!("Please report this issue to the knife repository.");
-                eprintln!("Error code: {}", e);
-                std::process::exit(1);
-            }
-        };
-        let ver: String = match File::open(version) {
-            Ok(mut f) => {
-                let mut vers = String::new();
-                f.read_to_string(&mut vers).expect("Failed to read version");
-                vers
-            }
-            Err(e) => {
-                eprintln!("{}{}", "Error".red(), ": Failed to get version.");
-                eprintln!("Please report this issue to the knife repository.");
-                eprintln!("Error code: {}", e);
-                std::process::exit(1);
-            }
-        };
+        let lang: String = fs::read_to_string(language.trim()).unwrap_or_else(throw_error);
 
-        
+        // get repository
+        let github: String = fs::read_to_string(repository).unwrap_or_else(throw_error);
+
+        let capa: String = fs::read_to_string(capacity).unwrap_or_else(throw_error);
+
+        let ver: String = fs::read_to_string(version).unwrap_or_else(throw_error);
+
         let capa = capa.trim();
         let ver = ver.trim();
-        let depen = depen.trim();
+        let mut depen = depen.trim();
         let github = github.trim();
-        
+
         if depen.is_empty() {
-            depen = "None".to_string();
+            depen = "None";
         }
 
         println!("install package: {}", program);
