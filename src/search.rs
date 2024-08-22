@@ -9,7 +9,7 @@ use std::io::Read;
 use std::path::Path;
 use std::path::PathBuf;
 
-// serch package list
+// search package list
 pub fn search_program(program: &String) -> bool {
     let dir_path = dirs::home_dir()
         .expect("Failed to get home directory")
