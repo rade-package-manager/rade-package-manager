@@ -1,17 +1,15 @@
-use colored::*;
-use dirs::home_dir;
-use git2::Repository;
-use std::env;
-use std::ffi::OsStr;
-use std::fs;
-use std::io;
-use std::io::Read;
-use std::path::Path;
-use std::path::PathBuf;
+pub mod get {
+    use colored::*;
+    use dirs::home_dir;
+    use git2::Repository;
+    use std::env;
+    use std::ffi::OsStr;
+    use std::fs;
+    use std::io;
+    use std::io::Read;
+    use std::path::Path;
+    use std::path::PathBuf;
 
-pub struct Get {}
-
-impl Get {
     // serch package list
     pub fn search_program(program: String) {
         let dir_path = dirs::home_dir()
@@ -44,8 +42,8 @@ impl Get {
                             Ok(files) => {
                                 for file in files {
                                     if let Ok(file) = file {
-                                        self::Get::is_repositry(file.path());
-                                        println!("{:?}",file.path());
+                                        is_repositry(file.path());
+                                        println!("{:?}", file.path());
                                     }
                                 }
                             }
