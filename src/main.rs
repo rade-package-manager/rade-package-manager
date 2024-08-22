@@ -7,40 +7,38 @@ use std::fs;
 use std::io;
 mod gitl;
 mod info;
-mod install;
-mod search;
 use clap::{Arg, Command};
+mod search;
 
 fn main() {
     let version = info::VERSION;
 
     let matches = Command::new("knife")
+        .version("0.2")
         .about("A simple, fast, and safe package manager")
-        .arg(
-            Arg::new("command")
-                .help("The command to execute")
-                .required(true)
-                .index(1),
-        )
-        .arg(
-            Arg::new("package")
-                .help("The package name (for install command)")
-                .required(false)
-                .index(2),
+        .subcommand(Command::new("update").about("Update the package list"))
+        .subcommand(Command::new("upgrade").about("Upgrade the knife tool"))
+        .subcommand(
+            Command::new("install").about("Install a package").arg(
+                Arg::new("package")
+                    .help("The package to install")
+                    .required(true)
+                    .index(1),
+            ),
         )
         .get_matches();
 
-    match matches.get_one::<String>("command").unwrap().as_str() {
-        "update" => {
+    match matches.subcommand() {
+        Some(("update", _)) => {
             gitl::update_package_list();
             std::process::exit(0);
         }
-        "upgrade" => {
+        Some(("upgrade", _)) => {
             gitl::upgrade_knife(version);
         }
-        "install" => {
-            if let Some(package) = matches.get_one::<String>("package") {
-                install::install_program(&package.to_string());
+        Some(("install", sub_matches)) => {
+            if let Some(package) = sub_matches.get_one::<String>("package") {
+                search::search_program(&package.to_string());
             } else {
                 eprintln!("{} Specify the package to install", "Error:".red());
             }
@@ -48,8 +46,8 @@ fn main() {
         _ => {
             println!(
                 "{}{}",
-                "Error: option needed.".red(),
-                " Please run with the --help option to check your options."
+                "Error: command needed.".red(),
+                " Please run with the --help option to check your commands."
             );
             std::process::exit(1);
         }
