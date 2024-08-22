@@ -123,6 +123,7 @@ pub fn install(program: &String) {
 
         if (ok_ == "y" || ok_ == "yes" || ok_ == "") {
             // start installation
+            fs::remove_dir_all(knife_home.join("build/"));
             print!("cloning Repository...");
             io::stdout().flush().unwrap();
 
@@ -165,7 +166,8 @@ pub fn install(program: &String) {
                 }
 
                 let name = format!("{}{}", knife_home.join("build/").display(), program);
-                fs::rename(name, knife_home.join("bin"));
+                fs::rename(name, knife_home.join("bin/").join(program))
+                    .expect("Failed to move file");
                 return;
             }
         }
