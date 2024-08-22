@@ -25,9 +25,6 @@ For more information, please visit https://github.com/knife-package-manager/knif
 ## Usage
 
 
->[!WARNING]
->Since Knife is still under development, the install command has not been implemented yet.<br>
->Please wait for a while
 - **Install a package**:
   ```bash
   knife install <program>
