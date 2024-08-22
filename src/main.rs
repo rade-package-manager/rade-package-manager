@@ -7,49 +7,39 @@ use std::fs;
 use std::io;
 mod gitl;
 mod info;
-use clap::{Arg, Command};
 mod search;
+use clap::Parser;
+
+#[derive(Parser)]
+#[command(version = "0.2")]
+/// A simple, fast, and safe package manager
+enum Cli {
+    /// Update the package list
+    Update,
+    /// Upgrade the knife tool
+    Upgrade,
+    /// Install a package
+    Install {
+        /// The package name (for install command)
+        package: String,
+    },
+}
 
 fn main() {
     let version = info::VERSION;
 
-    let matches = Command::new("knife")
-        .version("0.2")
-        .about("A simple, fast, and safe package manager")
-        .subcommand(Command::new("update").about("Update the package list"))
-        .subcommand(Command::new("upgrade").about("Upgrade the knife tool"))
-        .subcommand(
-            Command::new("install").about("Install a package").arg(
-                Arg::new("package")
-                    .help("The package to install")
-                    .required(true)
-                    .index(1),
-            ),
-        )
-        .get_matches();
+    let args = Cli::parse();
 
-    match matches.subcommand() {
-        Some(("update", _)) => {
+    match args {
+        Cli::Update => {
             gitl::update_package_list();
             std::process::exit(0);
         }
-        Some(("upgrade", _)) => {
+        Cli::Upgrade => {
             gitl::upgrade_knife(version);
         }
-        Some(("install", sub_matches)) => {
-            if let Some(package) = sub_matches.get_one::<String>("package") {
-                search::search_program(&package.to_string());
-            } else {
-                eprintln!("{} Specify the package to install", "Error:".red());
-            }
-        }
-        _ => {
-            println!(
-                "{}{}",
-                "Error: command needed.".red(),
-                " Please run with the --help option to check your commands."
-            );
-            std::process::exit(1);
+        Cli::Install { package } => {
+            search::search_program(&package);
         }
     }
 }
