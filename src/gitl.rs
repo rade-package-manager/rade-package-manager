@@ -38,24 +38,19 @@ Error");
 }
 
 /// upgrade knife
-pub fn upgrade_knife(knife_version: f64) {
+pub fn upgrade_knife(knife_version: String) {
     // Confirmation of the version available for pickup
     let upgrading_version = "https://github.com/knife-package-manager/knife-package-manager";
 
     // Receive the latest version
-    let response: String = blocking::get(upgrading_version)
+    let new_version: String = blocking::get(upgrading_version)
         .expect("Failed to send GET request")
         .text()
-        .expect("Failed to read response text");
+        .expect("Failed to read response text")
+        .trim()
+        .to_string();
 
-    let response = response.trim();
-
-    // get new version
-    let new_version: f64 = response
-        .parse()
-        .expect("Failed to make latest version an float type");
-
-    if new_version > knife_version {
+    if new_version != knife_version {
         println!("{}", "Upgrade is valid!".green().bold());
         println!("{} → {}", knife_version, new_version);
         let url: &str = "https://github.com/knife-package-manager/knife-package-manager";

@@ -38,7 +38,7 @@ fn main() {
             std::process::exit(0);
         }
         Cli::Upgrade => {
-            gitl::upgrade_knife(version);
+            gitl::upgrade_knife(version.to_string());
         }
         Cli::Install { package } => {
             install::install(&package);
