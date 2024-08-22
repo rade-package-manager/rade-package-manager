@@ -138,6 +138,7 @@ pub fn install(program: &String) {
                 let status_chmod = process::Command::new("chmod")
                     .arg("+x")
                     .arg(knife_home.join("build/install.sh"))
+                    .current_dir(knife_home.join("build"))
                     .stdout(Stdio::null())
                     .status()
                     .expect("Failed to start chmod");
@@ -154,6 +155,7 @@ pub fn install(program: &String) {
                 io::stdout().flush().unwrap();
                 let status_installsh = process::Command::new("sh")
                     .arg(knife_home.join("build/install.sh"))
+                    .current_dir(knife_home.join("build"))
                     .status()
                     .expect("Failed to start install.sh");
                 if !status_installsh.success() {
@@ -163,16 +165,7 @@ pub fn install(program: &String) {
                 }
 
                 let name = format!("{}{}", knife_home.join("build/").display(), program);
-                process::Command::new("mv")
-                    .arg(name)
-                    .arg(knife_home.join("bin/"))
-                    .current_dir(knife_home.join("build/"))
-                    .status()
-                    .expect("Failed to start mv");
-                println!(
-                    "the {} is installed! For more information, please visit {}",
-                    program, github
-                );
+                fs::rename(name, knife_home.join("bin"));
                 return;
             }
         }
