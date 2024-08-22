@@ -8,6 +8,7 @@ use std::io;
 mod gitl;
 mod info;
 mod install;
+mod search;
 use clap::{Arg, Command};
 
 fn main() {
@@ -39,7 +40,7 @@ fn main() {
         }
         "install" => {
             if let Some(package) = matches.get_one::<String>("package") {
-                install::get::search_program(package.to_string());
+                install::install_program(&package.to_string());
             } else {
                 eprintln!("{} Specify the package to install", "Error:".red());
             }
