@@ -85,7 +85,7 @@ Error");
             io::stdout().flush().unwrap();
             if let Err(se) = fs::create_dir(home.join(".knife")) {
                 eprintln!("{}{}","Failed to create directory\nPlease report this problem to the Knife repository\nError code:".red(),se);
-                eprintln!("{}{}{}","P.S.: You can install the latest version of Knife by installing Knife again.\nRun"," curl -sSf https://17do.github.io/knife-installer.github.io/sh.install.html | sh".green()," to install the latest version of Knife.");
+                eprintln!("{}{}{}","P.S.: You can install the latest version of Knife by installing Knife again.\nRun"," curl -sSfL https://github.com/knife-package-manager/knife-installer/releases/download/0.1/installer.sh -o install.sh; chmod +x install.sh; ./install.sh ".green()," to install the latest version of Knife.");
                 std::process::exit(1);
             }
             println!("ok");
@@ -97,7 +97,7 @@ Error");
                 home.join(".knife/build"),
             ) {
                 eprintln!("{}{}","Error: Failed to get knife\nPlease report this problem to the knife repository\nError code:".red(),er);
-                eprintln!("{}{}{}","P.S.: You can install the latest version of Knife by installing Knife again.\nRun"," curl -sSf https://17do.github.io/knife-installer.github.io/sh.install.html | sh".green()," to install the latest version of Knife.");
+                eprintln!("{}{}{}","P.S.: You can install the latest version of Knife by installing Knife again.\nRun"," curl -sSfL https://github.com/knife-package-manager/knife-installer/releases/download/0.1/installer.sh -o install.sh; chmod +x install.sh; ./install.sh ".green()," to install the latest version of Knife.");
                 fs::remove_dir_all(home.join(".knife")).expect("failed to remove directory");
                 std::process::exit(1);
             }
@@ -110,7 +110,7 @@ Error");
                 home.join(".knife/packagelist"),
             ) {
                 eprintln!("{}{}","Failed to retrieve package list.\nPlease submit this issue to the Knife repository.\nError code:".red(),error);
-                eprintln!("{}{}{}","P.S.: You can install the latest version of Knife by installing Knife again.\nRun"," curl -sSf https://17do.github.io/knife-installer.github.io/sh.install.html | sh".green()," to install the latest version of Knife.");
+                eprintln!("{}{}{}","P.S.: You can install the latest version of Knife by installing Knife again.\nRun"," curl -sSfL https://github.com/knife-package-manager/knife-installer/releases/download/0.1/installer.sh -o install.sh; chmod +x install.sh; ./install.sh ".green()," to install the latest version of Knife.");
                 println!("removing all...");
                 fs::remove_dir_all(home.join(".knife")).expect("failed to remove directory");
                 std::process::exit(1);
@@ -121,7 +121,7 @@ Error");
             // cleate ~/.knife/bin/
             if let Err(ree) = fs::create_dir(home.join(".knife/bin")) {
                 eprintln!("{}{}","Failed to create directory\nPlease report this problem to the Knife repository\nError code:".red(),ree);
-                eprintln!("{}{}{}","P.S.: You can install the latest version of Knife by installing Knife again.\nRun"," curl -sSf https://17do.github.io/knife-installer.github.io/sh.install.html | sh".green()," to install the latest version of Knife.");
+                eprintln!("{}{}{}","P.S.: You can install the latest version of Knife by installing Knife again.\nRun"," curl -sSfL https://github.com/knife-package-manager/knife-installer/releases/download/0.1/installer.sh -o install.sh; chmod +x install.sh; ./install.sh ".green()," to install the latest version of Knife.");
                 fs::remove_dir_all(home.join(".knife")).expect("failed to remove directory");
                 std::process::exit(1);
             }
