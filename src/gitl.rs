@@ -64,7 +64,7 @@ Error");
         if new_version > knife_version {
             println!("{}", "Upgrade is valid!".green().bold());
             println!("{} → {}", knife_version, new_version);
-            let url: &str = "https://github.com/17do/knife-package-manager";
+            let url: &str = "https://github.com/knife-package-manager/knife-package-manager";
             let home = match home_dir() {
                 Some(path) => path,
                 None => {
@@ -106,7 +106,7 @@ Error");
             io::stdout().flush().unwrap();
             // clone package list
             if let Err(error) = Repository::clone(
-                "https://github.com/17do/knife-package-list",
+                "https://github.com/knife-package-manager/knife-package-list",
                 home.join(".knife/packagelist"),
             ) {
                 eprintln!("{}{}","Failed to retrieve package list.\nPlease submit this issue to the Knife repository.\nError code:".red(),error);
