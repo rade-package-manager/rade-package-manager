@@ -40,7 +40,7 @@ Error");
 /// upgrade knife
 pub fn upgrade_knife(knife_version: f64) {
     // Confirmation of the version available for pickup
-    let upgrading_version = "https://17do.github.io/knife-installer.github.io/";
+    let upgrading_version = "https://github.com/knife-package-manager/knife-package-manager";
 
     // Receive the latest version
     let response: String = blocking::get(upgrading_version)
