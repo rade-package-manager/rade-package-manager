@@ -97,15 +97,12 @@ pub fn install(program: &String) {
             }
         };
 
-        
         let capa = capa.trim();
         let ver = ver.trim();
         let depen = depen.trim();
         let github = github.trim();
-        
-        if depen.is_empty() {
-            depen = "None".to_string();
-        }
+
+        let depen = if depen.is_empty() { "None" } else { depen };
 
         println!("install package: {}", program);
         println!("capacity: {}bytes", capa);
