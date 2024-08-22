@@ -16,7 +16,7 @@ Knife is designed to work in any environment and offers a straightforward instal
 To install Knife, run the following command:
 <br>
 ```bash
-curl -sSfL https://github.com/17do/knife-installer.github.io/releases/download/0.1/install.sh -o install.sh; chmod +x install.sh; ./install.sh 
+curl -sSfL https://github.com/knife-package-manager/knife-installer/releases/download/0.1/installer.sh -o install.sh; chmod +x install.sh; ./install.sh 
 ```
 This command installs the install.sh file and runs install.sh.
 After installation, the install.sh file will be automatically deleted.
