@@ -39,7 +39,7 @@ fn main() {
         }
         "install" => {
             if let Some(package) = matches.get_one::<String>("package") {
-                install::Get::search_program(package.to_string());
+                install::get::search_program(package.to_string());
             } else {
                 eprintln!("{} Specify the package to install", "Error:".red());
             }
