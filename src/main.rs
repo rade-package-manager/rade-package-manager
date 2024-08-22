@@ -31,11 +31,11 @@ fn main() {
 
     match matches.get_one::<String>("command").unwrap().as_str() {
         "update" => {
-            gitl::Gitl::update_package_list();
+            gitl::update_package_list();
             std::process::exit(0);
         }
         "upgrade" => {
-            gitl::Gitl::upgrade_knife(version);
+            gitl::upgrade_knife(version);
         }
         "install" => {
             if let Some(package) = matches.get_one::<String>("package") {
