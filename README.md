@@ -20,7 +20,7 @@ curl -sSfL https://github.com/knife-package-manager/knife-installer/releases/dow
 ```
 This command installs the install.sh file and runs install.sh.
 After installation, the install.sh file will be automatically deleted.
-For more information, please visit https://github.com/17do/knife-installer.github.io
+For more information, please visit https://github.com/knife-package-manager/knife-installer/
 
 ## Usage
 
