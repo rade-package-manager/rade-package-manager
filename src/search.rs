@@ -40,7 +40,7 @@ pub fn search_program(program: &String) -> bool {
                 if target.is_dir() {
                     ret = true;
                 } else {
-                    println!("  (Not a directory)");
+                    found = false;
                 }
 
                 break;
