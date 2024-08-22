@@ -2,16 +2,18 @@
 use colored::*;
 use dirs::home_dir;
 use git2::Repository;
+use search::search_program;
 use std::env;
 use std::fs;
 use std::io;
 mod gitl;
 mod info;
+mod install;
 mod search;
 use clap::Parser;
 
 #[derive(Parser)]
-#[command(version = "0.2")]
+#[command(version = "0.3")]
 /// A simple, fast, and safe package manager
 enum Cli {
     /// Update the package list
@@ -39,7 +41,7 @@ fn main() {
             gitl::upgrade_knife(version);
         }
         Cli::Install { package } => {
-            search::search_program(&package);
+            install::install(&package);
         }
     }
 }

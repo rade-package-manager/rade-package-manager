@@ -8,8 +8,9 @@ use std::io;
 use std::io::Write;
 
 // update knife package list
+
 pub fn update_package_list() {
-    let url = "https://github.com/17do/knife-package-list";
+    let url = "https://github.com/knife-package-manager/knife-package-list";
     let home = match home_dir() {
         Some(path) => path,
         None => {
