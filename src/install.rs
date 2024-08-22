@@ -17,16 +17,12 @@ pub fn install(program: &String) {
     let search_ = search::search_program(&program);
     let knife_home = home_dir().expect("Failed to get ~/.knife/").join(".knife/");
     if search_ {
-        println!("found program!");
         let basepath = format!("{}{}", knife_home.join("packagelist/").display(), &program);
         let dependencies = format!("{}{}", basepath, "/dependencies");
         let language = format!("{}{}", basepath, "/language");
         let repository = format!("{}{}", basepath, "/repository");
         let capacity = format!("{}{}", basepath, "/capacity");
         let version = format!("{}{}", basepath, "/version");
-
-        // get dependencies.
-        println!("found: {}", dependencies);
 
         let mut depen: String = match File::open(dependencies) {
             Ok(mut o) => {
