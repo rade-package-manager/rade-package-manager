@@ -1,21 +1,15 @@
 #![allow(warnings)]
-use crate::install;
-use crate::search;
+use crate::{install, search};
 use colored::*;
 use dirs::home_dir;
 use git2::Repository;
-use std::env;
-use std::fmt::format;
-use std::fmt::write;
-use std::fs;
-use std::fs::File;
-use std::io;
-use std::io::Read;
-use std::io::Write;
-use std::path::Path;
-use std::process;
-use std::process::exit;
-use std::process::Stdio;
+use std::{
+    env,
+    fs::{self, File},
+    io::{self, Read, Write},
+    path::Path,
+    process::{self, exit, Stdio},
+};
 
 pub fn install(program: &String) {
     let search_ = search::search_program(&program);
@@ -28,79 +22,34 @@ pub fn install(program: &String) {
         let capacity = format!("{}{}", basepath, "/capacity");
         let version = format!("{}{}", basepath, "/version");
 
-        let mut depen: String = match File::open(dependencies) {
-            Ok(mut o) => {
-                let mut dependen = String::new();
-                o.read_to_string(&mut dependen)
-                    .expect("failed to read file");
-                dependen
+        fn open_and_read_file<P: AsRef<Path>>(path: P, read: &str, get: &str) -> String {
+            match File::open(path) {
+                Ok(mut f) => {
+                    let mut result = String::new();
+                    f.read_to_string(&mut result)
+                        .unwrap_or_else(|_| panic!("failed to read {}", read));
+                    result
+                }
+                Err(e) => {
+                    eprintln!("{}: Failed to get {}", "Error".red(), get);
+                    eprintln!("Please report this issue to the knife repository.");
+                    eprintln!("Error code: {}", e);
+                    std::process::exit(1);
+                }
             }
-            Err(r) => {
-                eprintln!("{}{}", "Error".red(), ": Failed to get dependencies.");
-                eprintln!("Please report this issue to the knife repository.");
-                eprintln!("Error code: {}", r);
-                std::process::exit(1);
-            }
-        };
+        }
+
+        let mut depen: String = open_and_read_file(dependencies, "file", "dependencies");
 
         // get language
-        let lang: String = match File::open(language.trim()) {
-            Ok(mut o) => {
-                let mut lag = String::new();
-                o.read_to_string(&mut lag)
-                    .expect("failed to read language.");
-                lag
-            }
-            Err(e) => {
-                eprintln!("{}{}", "Error".red(), ": Failed to get language.");
-                eprintln!("Please report this issue to the knife repository.");
-                eprintln!("Error code: {}", e);
-                std::process::exit(1);
-            }
-        };
-        // get repository
-        let github: String = match File::open(repository) {
-            Ok(mut r) => {
-                let mut repo = String::new();
-                r.read_to_string(&mut repo)
-                    .expect("Failed to read repository");
-                repo
-            }
-            Err(e) => {
-                eprintln!("{}{}", "Error".red(), ": Failed to get repository.");
-                eprintln!("Please report this issue to the knife repository.");
-                eprintln!("Error code: {}", e);
-                std::process::exit(1);
-            }
-        };
-        let capa: String = match File::open(capacity) {
-            Ok(mut f) => {
-                let mut capa = String::new();
-                f.read_to_string(&mut capa)
-                    .expect("Failed to read capacity");
-                capa
-            }
-            Err(e) => {
-                eprintln!("{}{}", "Error".red(), ": Failed to get capacity.");
+        let lang: String = open_and_read_file(language.trim(), "language", "language");
 
-                eprintln!("Please report this issue to the knife repository.");
-                eprintln!("Error code: {}", e);
-                std::process::exit(1);
-            }
-        };
-        let ver: String = match File::open(version) {
-            Ok(mut f) => {
-                let mut vers = String::new();
-                f.read_to_string(&mut vers).expect("Failed to read version");
-                vers
-            }
-            Err(e) => {
-                eprintln!("{}{}", "Error".red(), ": Failed to get version.");
-                eprintln!("Please report this issue to the knife repository.");
-                eprintln!("Error code: {}", e);
-                std::process::exit(1);
-            }
-        };
+        // get repository
+        let github: String = open_and_read_file(repository, "repository", "repository");
+
+        let capa: String = open_and_read_file(capacity, "capacity", "capacity");
+
+        let ver: String = open_and_read_file(version, "version", "version");
 
         let capa = capa.trim();
         let ver = ver.trim();
@@ -115,9 +64,8 @@ pub fn install(program: &String) {
         }
         let exe =
             install::get_program_name(knife_home.join("build/").display().to_string(), program);
-        let exeit = format!("{}{}", knife_home.join("bin/").display().to_string(), exe);
-        let fr = Path::new(exeit.as_str());
-        if fr.exists() {
+        let exeit = knife_home.join("bin/").join(&exe);
+        if exeit.exists() {
             println!("The program is already installed.");
             println!(
                 "For more information about this program, please visit {}",
@@ -135,15 +83,13 @@ pub fn install(program: &String) {
         println!("repository: {}", github);
         println!("\ninstall {}?", program);
         print!("[y/n] ");
-        io::stdout().flush().unwrap();
         let mut ok_ = String::new();
         io::stdin().read_line(&mut ok_).unwrap();
         let ok_: &str = ok_.trim();
 
-        if (ok_ == "y" || ok_ == "yes" || ok_ == "") {
+        if ["y", "yes", ""].contains(&ok_) {
             // start Installation
             print!("chmod + ~/.knife/build/install.sh...");
-            io::stdout().flush().unwrap();
             if knife_home.join("build/install.sh").exists() {
                 let status_chmod = process::Command::new("chmod")
                     .arg("+x")
@@ -174,7 +120,7 @@ pub fn install(program: &String) {
                     );
                 }
                 fs::rename(
-                    knife_home.join("build/").join(exe.as_str()),
+                    knife_home.join("build/").join(&exe),
                     knife_home.join("bin/").join(&exe),
                 )
                 .expect("Failed to move file");
@@ -197,12 +143,12 @@ pub fn get_program_name(build_dir: String, program: &String) -> String {
         return program.to_string();
     }
     // 一時的に入れるだけ
-    let mut Str = String::new();
+    let mut str = String::new();
     // filはファイル
     //
-    if let Ok(mut Fl) = fs::File::open(exe_name.clone()) {
-        Fl.read_to_string(&mut Str).expect("failed to read file");
-        return Str.trim().to_string();
+    if let Ok(mut fl) = fs::File::open(&exe_name) {
+        fl.read_to_string(&mut str).expect("failed to read file");
+        return str.trim().to_string();
     } else {
         eprintln!("failed to read file: {}", exe_name.display());
         eprintln!("Please report this issue to the knife repository");
