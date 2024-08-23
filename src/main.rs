@@ -31,7 +31,10 @@ enum Cli {
     /// Upgrade the knife tool
     Upgrade,
     /// Lists the packages
-    List { subcommand: ListCommand },
+    List {
+        #[arg(short, long)]
+        installed: bool,
+    },
     /// Install a package
     Install {
         /// The package name (for install command)
@@ -53,13 +56,12 @@ fn main() {
         Cli::Install { package } => {
             install::install(&package);
         }
-        Cli::List { subcommand } => match subcommand {
-            ListCommand::List => {
+        Cli::List { installed } => {
+            if installed {
+                list::list("bin", true);
+            } else {
                 list::list("packagelist", false);
             }
-            ListCommand::ListInstall => {
-                list::list("bin", true);
-            }
-        },
+        }
     }
 }
