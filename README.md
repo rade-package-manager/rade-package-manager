@@ -5,7 +5,7 @@ Knife is designed to work in any environment and offers a straightforward instal
 <br>
 ## Features
 
-- **Custom Builds**: Every program is built from source using `make`, ensuring that it is optimized for your specific environment.
+- **Custom Builds**: Every program is built from source using `install.sh`, ensuring that it is optimized for your specific environment.
 - **No Sudo Required**: Install packages easily with `knife install <program>`—no need for `sudo` privileges.
 - **Easy Updates**: Keep Knife and your installed programs up to date with `knife update; knife upgrade`.
 - **Fast and Safe**: Written in Rust, Knife provides a high-speed and secure package management experience.
