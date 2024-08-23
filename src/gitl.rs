@@ -1,3 +1,4 @@
+#![allow(warnings)]
 use colored::*;
 use dirs::home_dir;
 use git2::Repository;
@@ -7,8 +8,7 @@ use std::fs;
 use std::io;
 use std::io::Write;
 
-// update knife package list
-
+/// update knife package list
 pub fn update_package_list() {
     let url = "https://github.com/knife-package-manager/knife-package-list";
     let home = match home_dir() {
@@ -112,6 +112,11 @@ pub fn upgrade_knife(knife_version: String) {
 
                 std::process::exit(1);
             }
+            fs::remove_dir_all(
+                home_dir()
+                    .expect("Failed to get home")
+                    .join(".knife/pakcagelist/.git"),
+            );
             println!("ok");
             println!("makeing knife...");
             let status = std::process::Command::new("make")
