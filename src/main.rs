@@ -13,7 +13,7 @@ mod search;
 use clap::Parser;
 
 #[derive(Parser)]
-#[command(version = "0.4")]
+#[command(version = "0.5")]
 /// A simple, fast, and safe package manager
 enum Cli {
     /// Update the package list

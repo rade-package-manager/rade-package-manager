@@ -40,7 +40,7 @@ Error");
 /// upgrade knife
 pub fn upgrade_knife(knife_version: String) {
     // Confirmation of the version available for pickup
-    let upgrading_version = "https://github.com/knife-package-manager/knife-package-manager";
+    let upgrading_version = "https://17do.github.io/knife-installer.github.io/";
 
     // Receive the latest version
     let new_version: String = blocking::get(upgrading_version)
@@ -52,88 +52,90 @@ pub fn upgrade_knife(knife_version: String) {
 
     if new_version != knife_version {
         println!("{}", "Upgrade is valid!".green().bold());
-        println!("{} → {}", knife_version, new_version);
-        let url: &str = "https://github.com/knife-package-manager/knife-package-manager";
-        let home = match home_dir() {
-            Some(path) => path,
-            None => {
-                eprintln!("Failed to obtain home directory. \nPlease report this issue to the Knife repository along with the operating system used.");
+        println!("{} {} {}", knife_version, "→".green().bold(), new_version);
+        println!("Want to upgrade your Knife?");
+        print!("[y/n] ");
+        io::stdout().flush().unwrap();
+        let mut Sstr = String::new();
+        io::stdin().read_line(&mut Sstr).unwrap();
+        let Sstr: &str = Sstr.trim();
+        if Sstr == "y" || Sstr == "yes" || Sstr == "" {
+            let url: &str = "https://github.com/knife-package-manager/knife-package-manager";
+            let home = match home_dir() {
+                Some(path) => path,
+                None => {
+                    eprintln!("Failed to obtain home directory. \nPlease report this issue to the Knife repository along with the operating system used.");
+                    std::process::exit(1);
+                }
+            };
+            println!("upgrading Knife");
+            let path = home.join(".knife/build");
+            if path.exists() {
+                print!("removing {}...", path.display());
+                io::stdout().flush().unwrap();
+                if let Err(error_) = fs::remove_dir_all(&path) {
+                    eprintln!("{}{}","Error: Failed to remove knife\nPlease report this problem to the knife repository\nError code:".red(),error_);
+                    std::process::exit(1);
+                }
+                println!("ok");
+            }
+
+            print!("creating .knife/build...");
+            io::stdout().flush().unwrap();
+            if let Err(er) = Repository::clone(
+                "https://github.com/knife-package-manager/knife-package-manager",
+                path,
+            ) {
+                eprintln!("{}: Failed to get repository", "Error".red());
+                eprintln!("Please report this issue to the knife repository");
+                eprintln!("Error code: {}", er);
                 std::process::exit(1);
             }
-        };
-        let path = home.join(".knife/");
-        println!("upgrading Knife");
-        print!("removing {}...", path.display());
-        io::stdout().flush().unwrap();
-        if let Err(error_) = fs::remove_dir_all(&path) {
-            eprintln!("{}{}","Error: Failed to remove knife\nPlease report this problem to the knife repository\nError code:".red(),error_);
-            std::process::exit(1);
-        }
-        println!("ok");
-        print!("creating .knife...");
-        io::stdout().flush().unwrap();
-        if let Err(se) = fs::create_dir(home.join(".knife")) {
-            eprintln!("{}{}","Failed to create directory\nPlease report this problem to the Knife repository\nError code:".red(),se);
-            eprintln!("{}{}{}","P.S.: You can install the latest version of Knife by installing Knife again.\nRun"," curl -sSfL https://github.com/knife-package-manager/knife-installer/releases/download/0.1/installer.sh -o install.sh; chmod +x install.sh; ./install.sh ".green()," to install the latest version of Knife.");
-            std::process::exit(1);
-        }
-        println!("ok");
-        print!("creating .knife/build...");
-        io::stdout().flush().unwrap();
-        // clone knife.
-        if let Err(er) = Repository::clone(
-            "https://github.com/17do/knife-package-manager",
-            home.join(".knife/build"),
-        ) {
-            eprintln!("{}{}","Error: Failed to get knife\nPlease report this problem to the knife repository\nError code:".red(),er);
-            eprintln!("{}{}{}","P.S.: You can install the latest version of Knife by installing Knife again.\nRun"," curl -sSfL https://github.com/knife-package-manager/knife-installer/releases/download/0.1/installer.sh -o install.sh; chmod +x install.sh; ./install.sh ".green()," to install the latest version of Knife.");
-            fs::remove_dir_all(home.join(".knife")).expect("failed to remove directory");
-            std::process::exit(1);
-        }
-        println!("ok");
-        print!("creating .knife/packagelist...");
-        io::stdout().flush().unwrap();
-        // clone package list
-        if let Err(error) = Repository::clone(
-            "https://github.com/knife-package-manager/knife-package-list",
-            home.join(".knife/packagelist"),
-        ) {
-            eprintln!("{}{}","Failed to retrieve package list.\nPlease submit this issue to the Knife repository.\nError code:".red(),error);
-            eprintln!("{}{}{}","P.S.: You can install the latest version of Knife by installing Knife again.\nRun"," curl -sSfL https://github.com/knife-package-manager/knife-installer/releases/download/0.1/installer.sh -o install.sh; chmod +x install.sh; ./install.sh ".green()," to install the latest version of Knife.");
-            println!("removing all...");
-            fs::remove_dir_all(home.join(".knife")).expect("failed to remove directory");
-            std::process::exit(1);
-        }
-        println!("ok");
-        print!("creating .knife/bin...");
-        io::stdout().flush().unwrap();
-        // cleate ~/.knife/bin/
-        if let Err(ree) = fs::create_dir(home.join(".knife/bin")) {
-            eprintln!("{}{}","Failed to create directory\nPlease report this problem to the Knife repository\nError code:".red(),ree);
-            eprintln!("{}{}{}","P.S.: You can install the latest version of Knife by installing Knife again.\nRun"," curl -sSfL https://github.com/knife-package-manager/knife-installer/releases/download/0.1/installer.sh -o install.sh; chmod +x install.sh; ./install.sh ".green()," to install the latest version of Knife.");
-            fs::remove_dir_all(home.join(".knife")).expect("failed to remove directory");
-            std::process::exit(1);
-        }
-        println!("ok");
-        println!("makeing {}", home.join(".knife/build").display());
-        let status = std::process::Command::new("make")
-            .current_dir(home.join(".knife/build"))
-            .status()
-            .expect("failed to execute make.");
-        if status.success() {
             println!("ok");
+            print!("removing packagelist...");
+            io::stdout().flush().unwrap();
+            fs::remove_dir_all(
+                home_dir()
+                    .expect("failed to get home")
+                    .join(".knife/packagelist"),
+            )
+            .expect("Failed to remove directory");
+
+            print!("creating .knife/packagelist...");
+            io::stdout().flush().unwrap();
+            // clone package list
+            if let Err(error) = Repository::clone(
+                "https://github.com/knife-package-manager/knife-package-list",
+                home.join(".knife/packagelist"),
+            ) {
+                eprintln!("{}{}","Failed to retrieve package list.\nPlease submit this issue to the Knife repository.\nError code:".red(),error);
+
+                std::process::exit(1);
+            }
+            println!("ok");
+            println!("makeing knife...");
+            let status = std::process::Command::new("make")
+                .current_dir(home.join(".knife/build"))
+                .status()
+                .expect("failed to execute make.");
+            if status.success() {
+                println!("ok");
+            } else {
+                eprintln!(
+                    "{}",
+                    "Error: Make failed. Please report this issue to the Knife repository"
+                );
+                std::process::exit(1);
+            }
+            println!("{}", "All done!".green().bold());
+            println!("{}","Knife has been successfully upgraded. Please see the Knife repository for details on the update.".yellow());
+            std::process::exit(0);
         } else {
-            eprintln!(
-                "{}",
-                "Error: Make failed. Please report this issue to the Knife repository"
-            );
-            std::process::exit(1);
+            println!("Upgrade canceled.");
+            std::process::exit(0);
         }
-        println!("{}", "All done!".green().bold());
-        println!("{}","Knife has been successfully upgraded. Please see the Knife repository for details on the update.".yellow());
-        std::process::exit(0);
     } else {
-        println!("Knife is already up to date!");
+        println!("knfie is already up-to-date!");
         std::process::exit(0);
     }
 }
