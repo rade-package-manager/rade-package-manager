@@ -1,3 +1,5 @@
+#![allow(warnings)]
+use crate::install;
 use crate::search;
 use colored::*;
 use dirs::home_dir;
@@ -9,7 +11,7 @@ use std::fs::File;
 use std::io;
 use std::io::Read;
 use std::io::Write;
-
+use std::path::Path;
 use std::process;
 use std::process::Stdio;
 
@@ -141,14 +143,14 @@ pub fn install(program: &String) {
 
                 if !status_chmod.success() {
                     eprintln!(
-                        "{}: chmod failed. Please report this problem to the knife repository",
+                        "\n{}: chmod failed. Please report this problem to the knife repository",
                         "Error".red()
                     );
                     process::exit(1);
                 }
                 println!("ok");
-                print!("building...");
-                io::stdout().flush().unwrap();
+                println!("building...");
+
                 let status_installsh = process::Command::new("sh")
                     .arg(knife_home.join("build/install.sh"))
                     .current_dir(knife_home.join("build"))
@@ -156,15 +158,48 @@ pub fn install(program: &String) {
                     .expect("Failed to start install.sh");
                 if !status_installsh.success() {
                     println!(
-                        "install.sh failed. Please report this problem to the KNIFE repository"
+                        "\ninstall.sh failed. Please report this problem to the KNIFE repository"
                     );
                 }
-
-                let name = format!("{}{}", knife_home.join("build/").display(), program);
-                fs::rename(name, knife_home.join("bin/").join(program))
-                    .expect("Failed to move file");
+                let inf = install::get_program_name(
+                    knife_home.join("build/").display().to_string(),
+                    &program,
+                );
+                println!("{inf}");
+                println!(
+                    "from: {}",
+                    knife_home.join("build/").join(inf.as_str()).display()
+                );
+                println!("to: {}", knife_home.join("bin/").join(&inf).display());
+                fs::rename(
+                    knife_home.join("build/").join(inf.as_str()),
+                    knife_home.join("bin/").join(inf),
+                )
+                .expect("Failed to move file");
                 return;
             }
         }
+    }
+}
+
+pub fn get_program_name(build_dir: String, program: &String) -> String {
+    // build_dir
+    let exe_name = Path::new(&build_dir).join(".knife/exe_name");
+    if !exe_name.exists() {
+        // プログラム名をただ返すだけ
+        println!("program: {}", exe_name.display());
+        return program.to_string();
+    }
+    // 一時的に入れるだけ
+    let mut Str = String::new();
+    // filはファイル
+    //
+    if let Ok(mut Fl) = fs::File::open(exe_name.clone()) {
+        Fl.read_to_string(&mut Str).expect("failed to read file");
+        return Str.trim().to_string();
+    } else {
+        eprintln!("failed to read file: {}", exe_name.display());
+        eprintln!("Please report this issue to the knife repository");
+        std::process::exit(1);
     }
 }
