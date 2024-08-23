@@ -5,6 +5,7 @@ use colored::*;
 use dirs::home_dir;
 use git2::Repository;
 use std::env;
+use std::fmt::format;
 use std::fmt::write;
 use std::fs;
 use std::fs::File;
@@ -13,6 +14,7 @@ use std::io::Read;
 use std::io::Write;
 use std::path::Path;
 use std::process;
+use std::process::exit;
 use std::process::Stdio;
 
 pub fn install(program: &String) {
@@ -80,6 +82,7 @@ pub fn install(program: &String) {
             }
             Err(e) => {
                 eprintln!("{}{}", "Error".red(), ": Failed to get capacity.");
+
                 eprintln!("Please report this issue to the knife repository.");
                 eprintln!("Error code: {}", e);
                 std::process::exit(1);
@@ -103,10 +106,29 @@ pub fn install(program: &String) {
         let ver = ver.trim();
         let depen = depen.trim();
         let github = github.trim();
-
+        fs::remove_dir_all(knife_home.join("build/"));
+        println!("cloning package...");
+        if let Err(e) = Repository::clone(&github, knife_home.join("build")) {
+            eprintln!("\n{}: Failed to Clone Repository.", "Error".red());
+            eprintln!("Please report this issue to the knife repository");
+            std::process::exit(1);
+        }
+        let exe =
+            install::get_program_name(knife_home.join("build/").display().to_string(), program);
+        let exeit = format!("{}{}", knife_home.join("bin/").display().to_string(), exe);
+        let fr = Path::new(exeit.as_str());
+        if fr.exists() {
+            println!("The program is already installed.");
+            println!(
+                "For more information about this program, please visit {}",
+                github
+            );
+            fs::remove_dir_all(knife_home.join("build/"));
+            std::process::exit(1);
+        }
         let depen = if depen.is_empty() { "None" } else { depen };
-
         println!("install package: {}", program);
+        println!("executable file name: {}", exe);
         println!("capacity: {}bytes", capa);
         println!("versions: {}", ver);
         println!("dependencies: {}", depen);
@@ -119,17 +141,7 @@ pub fn install(program: &String) {
         let ok_: &str = ok_.trim();
 
         if (ok_ == "y" || ok_ == "yes" || ok_ == "") {
-            // start installation
-            fs::remove_dir_all(knife_home.join("build/"));
-            print!("cloning Repository...");
-            io::stdout().flush().unwrap();
-
-            if let Err(e) = Repository::clone(&github, knife_home.join("build")) {
-                eprintln!("\n{}: Failed to Clone Repository.", "Error".red());
-                eprintln!("Please report this issue to the knife repository");
-                std::process::exit(1);
-            }
-            println!("ok");
+            // start Installation
             print!("chmod + ~/.knife/build/install.sh...");
             io::stdout().flush().unwrap();
             if knife_home.join("build/install.sh").exists() {
@@ -161,21 +173,17 @@ pub fn install(program: &String) {
                         "\ninstall.sh failed. Please report this problem to the KNIFE repository"
                     );
                 }
-                let inf = install::get_program_name(
-                    knife_home.join("build/").display().to_string(),
-                    &program,
-                );
-                println!("{inf}");
-                println!(
-                    "from: {}",
-                    knife_home.join("build/").join(inf.as_str()).display()
-                );
-                println!("to: {}", knife_home.join("bin/").join(&inf).display());
                 fs::rename(
-                    knife_home.join("build/").join(inf.as_str()),
-                    knife_home.join("bin/").join(inf),
+                    knife_home.join("build/").join(exe.as_str()),
+                    knife_home.join("bin/").join(&exe),
                 )
                 .expect("Failed to move file");
+                println!("{}", "All done!".green());
+                println!("Installation is complete");
+                println!(
+                    "For more information on {}, please see {}.",
+                    program, github
+                );
                 return;
             }
         }
@@ -186,8 +194,6 @@ pub fn get_program_name(build_dir: String, program: &String) -> String {
     // build_dir
     let exe_name = Path::new(&build_dir).join(".knife/exe_name");
     if !exe_name.exists() {
-        // プログラム名をただ返すだけ
-        println!("program: {}", exe_name.display());
         return program.to_string();
     }
     // 一時的に入れるだけ
