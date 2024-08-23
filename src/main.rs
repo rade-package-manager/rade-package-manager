@@ -55,10 +55,10 @@ fn main() {
         }
         Cli::List { subcommand } => match subcommand {
             ListCommand::List => {
-                list::list();
+                list::list("packagelist", false);
             }
             ListCommand::ListInstall => {
-                list::listinstall();
+                list::list("bin", true);
             }
         },
     }
