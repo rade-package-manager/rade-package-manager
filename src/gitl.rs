@@ -10,7 +10,7 @@ use std::io::Write;
 
 /// update knife package list
 pub fn update_package_list() {
-    let url = "https://github.com/knife-package-manager/knife-package-list";
+    let url = "https://github.com/rade-package-manager/rade-package-list";
     let home = match home_dir() {
         Some(path) => path,
         None => {
@@ -53,23 +53,23 @@ pub fn upgrade_knife(knife_version: String) {
     if new_version != knife_version {
         println!("{}", "Upgrade is valid!".green().bold());
         println!("{} {} {}", knife_version, "→".green().bold(), new_version);
-        println!("Want to upgrade your Knife?");
+        println!("Want to upgrade your comrade?");
         print!("[y/n] ");
         io::stdout().flush().unwrap();
         let mut Sstr = String::new();
         io::stdin().read_line(&mut Sstr).unwrap();
         let Sstr: &str = Sstr.trim();
         if Sstr == "y" || Sstr == "yes" || Sstr == "" {
-            let url: &str = "https://github.com/knife-package-manager/knife-package-manager";
+            let url: &str = "https://github.com/rade-package-manager/rade-package-manager";
             let home = match home_dir() {
                 Some(path) => path,
                 None => {
-                    eprintln!("Failed to obtain home directory. \nPlease report this issue to the Knife repository along with the operating system used.");
+                    eprintln!("Failed to obtain home directory. \nPlease report this issue to the comrade repository along with the operating system used.");
                     std::process::exit(1);
                 }
             };
-            println!("upgrading Knife");
-            let path = home.join(".knife/build");
+            println!("upgrading Comrade");
+            let path = home.join(".comrade/build");
             if path.exists() {
                 print!("removing {}...", path.display());
                 io::stdout().flush().unwrap();
@@ -83,7 +83,7 @@ pub fn upgrade_knife(knife_version: String) {
             print!("creating .knife/build...");
             io::stdout().flush().unwrap();
             if let Err(er) = Repository::clone(
-                "https://github.com/knife-package-manager/knife-package-manager",
+                "https://github.com/rade-package-manager/rade-package-manager",
                 path,
             ) {
                 eprintln!("{}: Failed to get repository", "Error".red());
@@ -97,30 +97,30 @@ pub fn upgrade_knife(knife_version: String) {
             fs::remove_dir_all(
                 home_dir()
                     .expect("failed to get home")
-                    .join(".knife/packagelist"),
+                    .join(".comrade/packagelist"),
             )
             .expect("Failed to remove directory");
-
+            println!("ok");
             print!("creating .knife/packagelist...");
             io::stdout().flush().unwrap();
             // clone package list
             if let Err(error) = Repository::clone(
-                "https://github.com/knife-package-manager/knife-package-list",
-                home.join(".knife/packagelist"),
+                "https://github.com/rade-package-manager/rade-package-list",
+                home.join(".comrade/packagelist"),
             ) {
-                eprintln!("{}{}","Failed to retrieve package list.\nPlease submit this issue to the Knife repository.\nError code:".red(),error);
+                eprintln!("{}{}","Failed to retrieve package list.\nPlease submit this issue to the comrade repository.\nError code:".red(),error);
 
                 std::process::exit(1);
             }
             fs::remove_dir_all(
                 home_dir()
                     .expect("Failed to get home")
-                    .join(".knife/pakcagelist/.git"),
+                    .join(".comrade/pakcagelist/.git"),
             );
             println!("ok");
-            println!("makeing knife...");
+            println!("makeing comrade...");
             let status = std::process::Command::new("make")
-                .current_dir(home.join(".knife/build"))
+                .current_dir(home.join(".comrade/build"))
                 .status()
                 .expect("failed to execute make.");
             if status.success() {
@@ -128,19 +128,19 @@ pub fn upgrade_knife(knife_version: String) {
             } else {
                 eprintln!(
                     "{}",
-                    "Error: Make failed. Please report this issue to the Knife repository"
+                    "Error: Make failed. Please report this issue to the comrade repository"
                 );
                 std::process::exit(1);
             }
             println!("{}", "All done!".green().bold());
-            println!("{}","Knife has been successfully upgraded. Please see the Knife repository for details on the update.".yellow());
+            println!("{}","Comrade has been successfully upgraded. Please see the Knife repository for details on the update.".yellow());
             std::process::exit(0);
         } else {
             println!("Upgrade canceled.");
             std::process::exit(0);
         }
     } else {
-        println!("knfie is already up-to-date!");
+        println!("comrade is already up-to-date!");
         std::process::exit(0);
     }
 }

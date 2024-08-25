@@ -13,7 +13,9 @@ use std::{
 
 pub fn install(program: &String) {
     let search_ = search::search_program(&program);
-    let knife_home = home_dir().expect("Failed to get ~/.knife/").join(".knife/");
+    let knife_home = home_dir()
+        .expect("Failed to get ~/.knife/")
+        .join(".comrade/");
     if search_ {
         let basepath = format!("{}{}", knife_home.join("packagelist/").display(), &program);
         let dependencies = format!("{}{}", basepath, "/dependencies");
@@ -32,7 +34,7 @@ pub fn install(program: &String) {
                 }
                 Err(e) => {
                     eprintln!("{}: Failed to get {}", "Error".red(), get);
-                    eprintln!("Please report this issue to the knife repository.");
+                    eprintln!("Please report this issue to the comrade repository.");
                     eprintln!("Error code: {}", e);
                     std::process::exit(1);
                 }
@@ -59,7 +61,7 @@ pub fn install(program: &String) {
         println!("cloning package...");
         if let Err(e) = Repository::clone(&github, knife_home.join("build")) {
             eprintln!("\n{}: Failed to Clone Repository.", "Error".red());
-            eprintln!("Please report this issue to the knife repository");
+            eprintln!("Please report this issue to the comrade repository");
             std::process::exit(1);
         }
         let exe =
@@ -83,13 +85,13 @@ pub fn install(program: &String) {
         println!("repository: {}", github);
         println!("\ninstall {}?", program);
         print!("[y/n] ");
+        io::stdout().flush().unwrap();
         let mut ok_ = String::new();
         io::stdin().read_line(&mut ok_).unwrap();
         let ok_: &str = ok_.trim();
-
         if ["y", "yes", ""].contains(&ok_) {
             // start Installation
-            print!("chmod + ~/.knife/build/install.sh...");
+            print!("chmod + ~/.comrade/build/install.sh...");
             if knife_home.join("build/install.sh").exists() {
                 let status_chmod = process::Command::new("chmod")
                     .arg("+x")
@@ -138,7 +140,7 @@ pub fn install(program: &String) {
 
 pub fn get_program_name(build_dir: String, program: &String) -> String {
     // build_dir
-    let exe_name = Path::new(&build_dir).join(".knife/exe_name");
+    let exe_name = Path::new(&build_dir).join(".comrade/exe_name");
     if !exe_name.exists() {
         return program.to_string();
     }
@@ -151,7 +153,7 @@ pub fn get_program_name(build_dir: String, program: &String) -> String {
         return str.trim().to_string();
     } else {
         eprintln!("failed to read file: {}", exe_name.display());
-        eprintln!("Please report this issue to the knife repository");
+        eprintln!("Please report this issue to the comrade repository");
         std::process::exit(1);
     }
 }

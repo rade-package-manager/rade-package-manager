@@ -9,7 +9,7 @@ use std::path::Path;
 pub fn list(dir_path: &str, is_show_file: bool) {
     let dir_path = dirs::home_dir()
         .expect("Failed to get home directory")
-        .join(format!(".knife/{}", dir_path));
+        .join(format!(".comrade/{}", dir_path));
 
     let dir = match fs::read_dir(&dir_path) {
         Ok(dir) => dir,
@@ -19,7 +19,7 @@ pub fn list(dir_path: &str, is_show_file: bool) {
                 "--Error--\n".red().bold(),
                 "Failed to retrieve package list.\n".red().bold(),
                 "please run ".red().bold(),
-                "knife update ".cyan(),
+                "rade update ".cyan(),
                 "to retrieve package list".red().bold()
             );
             std::process::exit(1);

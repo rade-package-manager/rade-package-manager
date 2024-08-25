@@ -1,2 +1,2 @@
-/// knife version.
-pub const VERSION: &str = "0.5";
+/// comrade version.
+pub const VERSION: &str = "0.6";

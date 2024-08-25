@@ -13,7 +13,7 @@ use std::path::PathBuf;
 pub fn search_program(program: &String) -> bool {
     let dir_path = dirs::home_dir()
         .expect("Failed to get home directory")
-        .join(".knife/packagelist");
+        .join(".comrade/packagelist");
 
     let dir = match fs::read_dir(&dir_path) {
         Ok(dir) => dir,
