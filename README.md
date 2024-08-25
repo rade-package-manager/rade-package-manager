@@ -28,14 +28,12 @@ After installation, the install.sh file will be automatically deleted.
 For more information, please visit https://github.com/knife-package-manager/knife-installer/
 
 ## Usage
-
-
 - **Install a package**:
   ```bash
   rade install <program>
   ```
 
-- **Update Knife**: 
+- **Update comrade**: 
   ```bash
   rade update; knife upgrade
   ```
