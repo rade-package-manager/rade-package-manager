@@ -1,7 +1,7 @@
 # comrade
 
 comrade is a simple, fast, and safe package manager written in Rust. It builds programs from source using `install.sh`, ensuring that the software is tailored to your environment. <br>
-Knife is designed to work in any environment and offers a straightforward installation process without requiring `sudo` privileges.
+comrade is designed to work in any environment and offers a straightforward installation process without requiring `sudo` privileges.
 <br>
 ## Features
 
