@@ -18,6 +18,11 @@ To install Knife, run the following command:
 ```bash
 curl -sSfL https://github.com/rade-package-manager/rade-installer/releases/download/0.1/installer.sh -o install.sh; chmod +x install.sh; ./install.sh 
 ```
+For Windows(powershell):
+```ps1
+Invoke-WebRequest -Uri "https://github.com/rade-package-manager/rade-installer/releases/download/0.1/installer.ps1" -OutFile "install.ps1"
+& "./install.ps1"
+```
 This command installs the install.sh file and runs install.sh.
 After installation, the install.sh file will be automatically deleted.
 For more information, please visit https://github.com/knife-package-manager/knife-installer/
