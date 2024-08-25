@@ -19,19 +19,19 @@ Error");
             std::process::exit(1);
         }
     };
-    let path = home.join(".knife/packagelist");
+    let path = home.join(".comrade/packagelist");
     // remove the packagelist
     println!("updateing package list..");
     println!("removing {}..", path.display());
     if let Err(er) = fs::remove_dir_all(&path) {
-        eprintln!("{}{}", "Could not delete directory.\n Please report this issue to the Knife repository\n Error code: ".red(),er);
+        eprintln!("{}{}", "Could not delete directory.\n Please report this issue to the comrade repository\n Error code: ".red(),er);
         std::process::exit(1);
     }
 
     // clone the packagelist
     println!("cloning {}", url);
     if let Err(error) = Repository::clone(url, &path) {
-        eprintln!("{}{}","Failed to retrieve package list.\nPlease submit this issue to the Knife repository.\nError code:".red(),error);
+        eprintln!("{}{}","Failed to retrieve package list.\nPlease submit this issue to the comrade repository.\nError code:".red(),error);
         std::process::exit(1);
     }
     println!("{}", "Successfully updated package list!");
@@ -74,7 +74,7 @@ pub fn upgrade_knife(knife_version: String) {
                 print!("removing {}...", path.display());
                 io::stdout().flush().unwrap();
                 if let Err(error_) = fs::remove_dir_all(&path) {
-                    eprintln!("{}{}","Error: Failed to remove knife\nPlease report this problem to the knife repository\nError code:".red(),error_);
+                    eprintln!("{}{}","Error: Failed to remove comrade\nPlease report this problem to the knife repository\nError code:".red(),error_);
                     std::process::exit(1);
                 }
                 println!("ok");
