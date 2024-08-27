@@ -23,6 +23,7 @@ enum Cli {
         /// The package name (for install command)
         package: String,
     },
+    Log,
 }
 
 fn main() {
@@ -46,5 +47,6 @@ fn main() {
                 list::list("packagelist", false);
             }
         }
+        Cli::Log => {}
     }
 }
