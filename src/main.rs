@@ -47,6 +47,7 @@ fn main() {
                 list::list("packagelist", false);
             }
         }
-        Cli::Log => {}
+        Cli::Log => {todo!()}
+
     }
 }
