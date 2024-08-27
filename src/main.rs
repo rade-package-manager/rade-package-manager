@@ -1,26 +1,9 @@
-#![allow(warnings)]
-use colored::*;
-use dirs::home_dir;
-use git2::Repository;
-use list::list;
-use search::search_program;
-use std::env;
-use std::fs;
-use std::io;
 mod gitl;
 mod info;
 mod install;
 mod list;
 mod search;
-use clap::{Parser, Subcommand, ValueEnum};
-
-#[derive(Clone, Subcommand, ValueEnum)]
-enum ListCommand {
-    /// Displays a list of packages available for installation.
-    List,
-    /// Displays a list of installed programs.
-    ListInstall,
-}
+use clap::Parser;
 
 #[derive(Parser)]
 #[command(version = "0.5")]

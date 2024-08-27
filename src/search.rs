@@ -1,13 +1,5 @@
 use colored::*;
-use dirs::home_dir;
-use git2::Repository;
-use std::env;
-use std::ffi::OsStr;
-use std::fs;
-use std::io;
-use std::io::Read;
-use std::path::Path;
-use std::path::PathBuf;
+use std::{ffi::OsStr, fs};
 
 // search package list
 pub fn search_program(program: &String) -> bool {
@@ -32,19 +24,17 @@ pub fn search_program(program: &String) -> bool {
 
     let mut found: bool = false;
     let mut ret: bool = false;
-    for entry in dir {
-        if let Ok(entry) = entry {
-            if entry.file_name().to_string_lossy() == program.clone() {
-                found = true;
-                let target = entry.path();
-                if target.is_dir() {
-                    ret = true;
-                } else {
-                    found = false;
-                }
-
-                break;
+    for entry in dir.flatten() {
+        if entry.file_name() == <String as AsRef<OsStr>>::as_ref(program) {
+            found = true;
+            let target = entry.path();
+            if target.is_dir() {
+                ret = true;
+            } else {
+                found = false;
             }
+
+            break;
         }
     }
 
