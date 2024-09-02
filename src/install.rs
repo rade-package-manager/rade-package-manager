@@ -1,4 +1,4 @@
-#![allow(warnings)]
+
 use crate::{install, search};
 use colored::*;
 use dirs::home_dir;
@@ -126,7 +126,9 @@ pub fn install(program: &String) {
                     knife_home.join("bin/").join(&exe),
                 )
                 .expect("Failed to move file");
-                println!("{}", "All done!".green());
+　
+　　　　　　　　　　　fs::remove_dir_all(knife_home.join("build/"));
+              println!("{}", "All done!".green());
                 println!("Installation is complete");
                 println!(
                     "For more information on {}, please see {}.",
