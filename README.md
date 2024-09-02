@@ -7,9 +7,9 @@ comrade is designed to work in any environment and offers a straightforward inst
 
 - **Custom Builds**: Every program is built from source using `install.sh`, ensuring that it is optimized for your specific environment.
 - **No Sudo Required**: Install packages easily with `rade install <program>`—no need for `sudo` privileges.
-- **Easy Updates**: Keep Knife and your installed programs up to date with `rade update; rade upgrade`.
-- **Fast and Safe**: Written in Rust, Knife provides a high-speed and secure package management experience.
-- **Universal Compatibility**: Knife is designed to work in any environment.
+- **Easy Updates**: Keep comrade and your installed programs up to date with `rade update; rade upgrade`.
+- **Fast and Safe**: Written in Rust, comrade provides a high-speed and secure package management experience.
+- **Universal Compatibility**: comrade is designed to work in any environment.
 
 ## Installation
 
