@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2024 17do
+// This software is licensed under the MIT License.
+
 #![allow(warnings)]
 use colored::*;
 use dirs::home_dir;
