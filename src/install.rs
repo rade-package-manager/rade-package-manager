@@ -57,7 +57,6 @@ pub fn install(program: &String) {
         let ver = ver.trim();
         let depen = depen.trim();
         let github = github.trim();
-        fs::remove_dir_all(knife_home.join("build/"));
         println!("cloning package...");
         if let Err(e) = Repository::clone(&github, knife_home.join("build")) {
             eprintln!("\n{}: Failed to Clone Repository.", "Error".red());
