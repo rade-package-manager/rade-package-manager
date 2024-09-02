@@ -126,8 +126,7 @@ pub fn install(program: &String) {
                     knife_home.join("bin/").join(&exe),
                 )
                 .expect("Failed to move file");
-　
-　　　　　　　　　　　fs::remove_dir_all(knife_home.join("build/"));
+                fs::remove_dir_all(knife_home.join("build/"));
               println!("{}", "All done!".green());
                 println!("Installation is complete");
                 println!(
