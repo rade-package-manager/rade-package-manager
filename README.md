@@ -7,13 +7,13 @@ comrade is designed to work in any environment and offers a straightforward inst
 
 - **Custom Builds**: Every program is built from source using `install.sh`, ensuring that it is optimized for your specific environment.
 - **No Sudo Required**: Install packages easily with `rade install <program>`—no need for `sudo` privileges.
-- **Easy Updates**: Keep Knife and your installed programs up to date with `rade update; knife upgrade`.
+- **Easy Updates**: Keep Knife and your installed programs up to date with `rade update; rade upgrade`.
 - **Fast and Safe**: Written in Rust, Knife provides a high-speed and secure package management experience.
 - **Universal Compatibility**: Knife is designed to work in any environment.
 
 ## Installation
 
-To install Knife, run the following command:
+To install comrade, run the following command:
 <br>
 ```bash
 curl -sSfL https://github.com/rade-package-manager/rade-installer/releases/download/0.1/installer.sh -o install.sh; chmod +x install.sh; ./install.sh 
