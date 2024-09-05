@@ -82,14 +82,14 @@ pub fn install(program: &String) {
             std::process::exit(1);
         }
         let depen = if depen.is_empty() { "None" } else { depen };
-        println!("install package: {}", program);
-        println!("executable file name: {}", exe);
-        println!("capacity: {}bytes", capa);
-        println!("language: {}", lang);
-        println!("versions: {}", ver);
-        println!("dependencies: {}", depen);
-        println!("repository: {}", github);
-        println!("\ninstall {}?", program);
+        println!("{} {}", "install package:".bold(), program);
+        println!("{} {}", "executable file name:".bold(), exe);
+        println!("{} {}bytes", "capacity:".bold(), capa);
+        println!("{} {}", "language:".bold(), lang);
+        println!("{} {}", "versions:".bold(), ver);
+        println!("{} {}", "dependencies:".bold(), depen);
+        println!("{} {}", "repository:".bold(), github);
+        println!("\n{} {}?", "install".bold(), program);
         print!("[y/n] ");
         io::stdout().flush().unwrap();
         let mut ok_ = String::new();
@@ -98,8 +98,11 @@ pub fn install(program: &String) {
         if ["y", "yes", ""].contains(&ok_) {
             // start Installation
             println!("{} {}", ">>>".green().bold(), "Start Installation".bold());
-            print!("{} {}", ">>>".green().bold(), "");
-            println!("building...");
+            println!(
+                "{} {}",
+                ">>>".yellow().bold(),
+                "run install.sh (build start)"
+            );
 
             let status_installsh = process::Command::new("sh")
                 .arg(knife_home.join("build/install.sh"))

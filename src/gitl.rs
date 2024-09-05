@@ -11,6 +11,7 @@ use std::env;
 use std::fs;
 use std::io;
 use std::io::Write;
+use std::os::unix::process;
 
 /// update knife package list
 pub fn update_package_list() {
@@ -42,7 +43,6 @@ Error");
             std::process::exit(1);
         }
     }
-
     // clone the packagelist
     println!(
         "{} {} {}",
@@ -55,6 +55,8 @@ Error");
 
         std::process::exit(1);
     }
+    let ps = path.join(".git");
+    fs::remove_dir_all(ps).unwrap();
     println!("{}", "Successfully updated package list!".bold());
 }
 
