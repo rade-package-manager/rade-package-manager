@@ -1,2 +1,2 @@
 /// comrade version.
-pub const VERSION: &str = "0.6";
+pub const VERSION: &str = "0.6.1";
