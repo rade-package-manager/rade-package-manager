@@ -7,11 +7,19 @@ mod gitl;
 mod info;
 mod install;
 mod list;
+mod log;
 mod search;
-use clap::Parser;
+use clap::{Parser, Subcommand, ValueEnum};
+
+#[derive(Subcommand, ValueEnum, Clone)]
+enum Logs {
+    Status,
+    New,
+    Search,
+}
 
 #[derive(Parser)]
-#[command(version = "0.5")]
+#[command(version = "0.6.1")]
 /// A simple, fast, and safe package manager
 enum Cli {
     /// Update the package list
@@ -28,8 +36,9 @@ enum Cli {
         /// The package name (for install command)
         package: String,
     },
-    /// not yet implemented.
-    Log,
+    Log {
+        logs: Logs,
+    },
 }
 
 fn main() {
@@ -53,8 +62,16 @@ fn main() {
                 list::list("packagelist", false);
             }
         }
-        Cli::Log => {
-            todo!()
-        }
+        Cli::Log { logs } => match logs {
+            Logs::New => {
+                log::new();
+            }
+            Logs::Status => {
+                todo!();
+            }
+            Logs::Search => {
+                todo!();
+            }
+        },
     }
 }

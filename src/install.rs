@@ -2,6 +2,7 @@
 // Copyright (c) 2024 17do
 // This software is licensed under the MIT License.
 
+use crate::log;
 use crate::{install, search};
 use colored::*;
 use dirs::home_dir;
@@ -59,6 +60,23 @@ pub fn install(program: &String) {
         let ver = ver.trim();
         let depen = depen.trim();
         let github = github.trim();
+        if home_dir()
+            .expect("failed to get home")
+            .join(".comrade/build")
+            .exists()
+        {
+            println!(
+                "{} {}",
+                ">>>".green().bold(),
+                "removing build directory...".bold()
+            );
+            fs::remove_dir_all(
+                home_dir()
+                    .expect("Failed to get home")
+                    .join(".comrade/build"),
+            )
+            .expect("Failed to remove build directory");
+        }
         println!("{} {}", ">>>".green().bold(), "Clone package...".bold());
         if let Err(_) = Repository::clone(&github, knife_home.join("build")) {
             eprintln!("\n{}: Failed to Clone Repository.", "Error".red());
@@ -114,14 +132,24 @@ pub fn install(program: &String) {
                     "\n{} install.sh failed. Please report this problem to the comrade repository",
                     ">>>".red().bold()
                 );
+                std::process::exit(1);
             }
+            println!("{} {}", ">>>".cyan().bold(), "build end".bold());
+            println!("{} {}", ">>>".green().bold(), "moving file...".bold());
             fs::rename(
                 knife_home.join("build/").join(&exe),
                 knife_home.join("bin/").join(&exe),
             )
             .expect("Failed to move file");
+            println!(
+                "{} {}",
+                ">>>".green().bold(),
+                "remove build directory...".bold()
+            );
             fs::remove_dir_all(knife_home.join("build/")).expect("Failed to remove dir");
-            println!("{} {}", ">>>".green().bold(), "All done!".bold());
+            println!("{} {}", ">>>".green().bold(), "Fill in the log...".bold());
+            log::Name::set(&knife_home.join("log/install/")).create(program.clone(), exe.as_str());
+            println!("{}", "All done!".bold());
             println!("Installation is complete");
             println!(
                 "For more information on {}, please see {}.",
