@@ -40,7 +40,7 @@ pub fn new() {
         let month = utc.month();
         let day = utc.day();
         let time = utc.time();
-        let data = format!("{}-{}-{}", year, month, day);
+        let data = format!("{}-{}-{}\n", year, month, day);
         let fo = format!("{}", time);
         let fo: Vec<_> = fo.split(".").collect();
         fl.write_all(data.as_bytes()).expect("Failed to write log");
