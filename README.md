@@ -35,7 +35,7 @@ For more information, please visit https://github.com/knife-package-manager/knif
 
 - **Update comrade**: 
   ```bash
-  rade update; knife upgrade
+  rade update; rade upgrade
   ```
   
 
