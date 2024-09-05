@@ -16,11 +16,11 @@ pub fn search_program(program: &String) -> bool {
         Err(_) => {
             eprintln!(
                 "{}{}{}{}{}",
-                "--Error--\n".red().bold(),
-                "Failed to retrieve package list.\n".red().bold(),
-                "please run ".red().bold(),
-                "knife update ".cyan(),
-                "to retrieve package list".red().bold()
+                ">>> ".red().bold(),
+                "Failed to retrieve package list.\n".bold(),
+                "please run ".bold(),
+                "rade update ".cyan(),
+                "to retrieve package list".bold()
             );
             return false;
         }

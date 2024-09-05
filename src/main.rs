@@ -2,6 +2,7 @@
 // Copyright (c) 2024 17do
 // This software is licensed under the MIT License.
 
+mod download_install;
 mod gitl;
 mod info;
 mod install;
@@ -27,6 +28,7 @@ enum Cli {
         /// The package name (for install command)
         package: String,
     },
+    /// not yet implemented.
     Log,
 }
 
@@ -51,7 +53,8 @@ fn main() {
                 list::list("packagelist", false);
             }
         }
-        Cli::Log => {todo!()}
-
+        Cli::Log => {
+            todo!()
+        }
     }
 }

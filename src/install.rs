@@ -7,17 +7,16 @@ use colored::*;
 use dirs::home_dir;
 use git2::Repository;
 use std::{
-    env,
     fs::{self, File},
     io::{self, Read, Write},
     path::Path,
-    process::{self, exit, Stdio},
+    process::{self},
 };
 
 pub fn install(program: &String) {
     let search_ = search::search_program(&program);
     let knife_home = home_dir()
-        .expect("Failed to get ~/.knife/")
+        .expect("Failed to get ~/.comrade/")
         .join(".comrade/");
     if search_ {
         let basepath = format!("{}{}", knife_home.join("packagelist/").display(), &program);
@@ -36,7 +35,7 @@ pub fn install(program: &String) {
                     result
                 }
                 Err(e) => {
-                    eprintln!("{}: Failed to get {}", "Error".red(), get);
+                    eprintln!("{} Failed to get {}", ">>>".red().bold(), get);
                     eprintln!("Please report this issue to the comrade repository.");
                     eprintln!("Error code: {}", e);
                     std::process::exit(1);
@@ -44,7 +43,7 @@ pub fn install(program: &String) {
             }
         }
 
-        let mut depen: String = open_and_read_file(dependencies, "file", "dependencies");
+        let depen: String = open_and_read_file(dependencies, "file", "dependencies");
 
         // get language
         let lang: String = open_and_read_file(language.trim(), "language", "language");
@@ -55,13 +54,13 @@ pub fn install(program: &String) {
         let capa: String = open_and_read_file(capacity, "capacity", "capacity");
 
         let ver: String = open_and_read_file(version, "version", "version");
-
+        let lang = lang.trim();
         let capa = capa.trim();
         let ver = ver.trim();
         let depen = depen.trim();
         let github = github.trim();
-        println!("cloning package...");
-        if let Err(e) = Repository::clone(&github, knife_home.join("build")) {
+        println!("{} {}", ">>>".green().bold(), "Clone package...".bold());
+        if let Err(_) = Repository::clone(&github, knife_home.join("build")) {
             eprintln!("\n{}: Failed to Clone Repository.", "Error".red());
             eprintln!("Please report this issue to the comrade repository");
             std::process::exit(1);
@@ -70,18 +69,23 @@ pub fn install(program: &String) {
             install::get_program_name(knife_home.join("build/").display().to_string(), program);
         let exeit = knife_home.join("bin/").join(&exe);
         if exeit.exists() {
-            println!("The program is already installed.");
+            println!(
+                "{} {}",
+                ">>>".red().bold(),
+                "The program is already installed!".bold()
+            );
             println!(
                 "For more information about this program, please visit {}",
                 github
             );
-            fs::remove_dir_all(knife_home.join("build/"));
+            fs::remove_dir_all(knife_home.join("build/")).expect("Failed to remove dir");
             std::process::exit(1);
         }
         let depen = if depen.is_empty() { "None" } else { depen };
         println!("install package: {}", program);
         println!("executable file name: {}", exe);
         println!("capacity: {}bytes", capa);
+        println!("language: {}", lang);
         println!("versions: {}", ver);
         println!("dependencies: {}", depen);
         println!("repository: {}", github);
@@ -93,50 +97,34 @@ pub fn install(program: &String) {
         let ok_: &str = ok_.trim();
         if ["y", "yes", ""].contains(&ok_) {
             // start Installation
-            print!("chmod + ~/.comrade/build/install.sh...");
-            if knife_home.join("build/install.sh").exists() {
-                let status_chmod = process::Command::new("chmod")
-                    .arg("+x")
-                    .arg(knife_home.join("build/install.sh"))
-                    .current_dir(knife_home.join("build"))
-                    .stdout(Stdio::null())
-                    .status()
-                    .expect("Failed to start chmod");
+            println!("{} {}", ">>>".green().bold(), "Start Installation".bold());
+            print!("{} {}", ">>>".green().bold(), "");
+            println!("building...");
 
-                if !status_chmod.success() {
-                    eprintln!(
-                        "\n{}: chmod failed. Please report this problem to the knife repository",
-                        "Error".red()
-                    );
-                    process::exit(1);
-                }
-                println!("ok");
-                println!("building...");
-
-                let status_installsh = process::Command::new("sh")
-                    .arg(knife_home.join("build/install.sh"))
-                    .current_dir(knife_home.join("build"))
-                    .status()
-                    .expect("Failed to start install.sh");
-                if !status_installsh.success() {
-                    println!(
-                        "\ninstall.sh failed. Please report this problem to the KNIFE repository"
-                    );
-                }
-                fs::rename(
-                    knife_home.join("build/").join(&exe),
-                    knife_home.join("bin/").join(&exe),
-                )
-                .expect("Failed to move file");
-                fs::remove_dir_all(knife_home.join("build/"));
-              println!("{}", "All done!".green());
-                println!("Installation is complete");
+            let status_installsh = process::Command::new("sh")
+                .arg(knife_home.join("build/install.sh"))
+                .current_dir(knife_home.join("build"))
+                .status()
+                .expect("Failed to start install.sh");
+            if !status_installsh.success() {
                 println!(
-                    "For more information on {}, please see {}.",
-                    program, github
+                    "\n{} install.sh failed. Please report this problem to the comrade repository",
+                    ">>>".red().bold()
                 );
-                return;
             }
+            fs::rename(
+                knife_home.join("build/").join(&exe),
+                knife_home.join("bin/").join(&exe),
+            )
+            .expect("Failed to move file");
+            fs::remove_dir_all(knife_home.join("build/")).expect("Failed to remove dir");
+            println!("{} {}", ">>>".green().bold(), "All done!".bold());
+            println!("Installation is complete");
+            println!(
+                "For more information on {}, please see {}.",
+                program, github
+            );
+            return;
         }
     }
 }
