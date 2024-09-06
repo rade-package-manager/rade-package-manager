@@ -1,7 +1,4 @@
-#![allow(warnings)]
-
-use chrono::format::format;
-use chrono::{Datelike, Utc};
+use chrono::Datelike;
 use dirs::home_dir;
 use std::fs;
 use std::io::Write;
@@ -21,11 +18,12 @@ impl<'a> Name<'a> {
     /// ```rust
     /// Name::set("$HOME/.comrade/log").create("hello_knife".to_string(),"hello\n");
     /// ```
-    pub fn create(&self, package: String, context: &str) -> () {
+    pub fn create(&self, package: String, context: &str) {
         let _name = self.basedir.join(package);
         println!("{}", _name.display());
-        let mut fis = fs::File::create(_name).expect("Failed to create file");
-        fis.write_all(context.as_bytes());
+        let mut fis = fs::File::create(&_name).expect("Failed to create file");
+        fis.write_all(context.as_bytes())
+            .unwrap_or_else(|_| panic!("Failed to write to {}", _name.display()));
     }
 }
 
@@ -50,4 +48,5 @@ pub fn new() {
     //fs::create_dir("");
 }
 
+#[allow(dead_code)]
 pub fn status() {}
