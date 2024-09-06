@@ -13,7 +13,6 @@ comrade is designed to work in any environment and offers a straightforward inst
 
 ## Installation
 
-To install comrade, run the following command:
 ### for Linux/Mac
 <br>
 
