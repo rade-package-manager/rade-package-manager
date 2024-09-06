@@ -43,9 +43,7 @@ After installation, pass the patch to $HOME\.comrade\bin.
   
 
 ## Contributing
-Regarding contributions, the rules have not yet been determined.  
-<br>
-Please wait a little longer.
+See [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 ## License
 <br>
