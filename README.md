@@ -16,18 +16,19 @@ comrade is designed to work in any environment and offers a straightforward inst
 To install comrade, run the following command:
 ## for Linux/Macos
 <br>
+
 ```bash
 curl -sSfL https://github.com/rade-package-manager/rade-installer/releases/download/0.1/installer.sh -o install.sh; chmod +x install.sh; ./install.sh 
 ```
+This command installs the install.sh file and runs install.sh.
+After installation, the install.sh file will be automatically deleted.
+For more information, please visit [installer repositry](https://github.com/rade-package-manager/rade-installer/)
 
 ## For Windows
-Download the installer for Windows and run it(x86_84)
+Download the installer for Windows and run it(x86_84)<br>
 [Download](https://github.com/rade-package-manager/rade-installer/releases/download/0.1/ComradePackageManagerInstaller.exe)
 
 
-This command installs the install.sh file and runs install.sh.
-After installation, the install.sh file will be automatically deleted.
-For more information, please visit https://github.com/knife-package-manager/knife-installer/
 
 ## Usage
 - **Install a package**:
