@@ -14,7 +14,7 @@ comrade is designed to work in any environment and offers a straightforward inst
 ## Installation
 
 To install comrade, run the following command:
-## for Linux/Macos
+### for Linux/Mac
 <br>
 
 ```bash
@@ -24,7 +24,7 @@ This command installs the install.sh file and runs install.sh.
 After installation, the install.sh file will be automatically deleted.
 For more information, please visit [installer repositry](https://github.com/rade-package-manager/rade-installer/)
 
-## For Windows
+### For Windows
 Download the installer for Windows and run it(x86_84)<br>
 [Download](https://github.com/rade-package-manager/rade-installer/releases/download/0.1/ComradePackageManagerInstaller.exe)
 <br>
