@@ -15,7 +15,7 @@ use std::{
 };
 
 pub fn install(program: &String) {
-    let search_ = search::search_program(&program);
+    let search_ = search::search_program(program);
     let knife_home = home_dir()
         .expect("Failed to get ~/.comrade/")
         .join(".comrade/");
@@ -78,7 +78,7 @@ pub fn install(program: &String) {
             .expect("Failed to remove build directory");
         }
         println!("{} {}", ">>>".green().bold(), "Clone package...".bold());
-        if let Err(_) = Repository::clone(&github, knife_home.join("build")) {
+        if Repository::clone(github, knife_home.join("build")).is_err() {
             eprintln!("\n{}: Failed to Clone Repository.", "Error".red());
             eprintln!("Please report this issue to the comrade repository");
             std::process::exit(1);
@@ -116,11 +116,7 @@ pub fn install(program: &String) {
         if ["y", "yes", ""].contains(&ok_) {
             // start Installation
             println!("{} {}", ">>>".green().bold(), "Start Installation".bold());
-            println!(
-                "{} {}",
-                ">>>".yellow().bold(),
-                "run install.sh (build start)"
-            );
+            println!("{} run install.sh (build start)", ">>>".yellow().bold());
 
             let status_installsh = process::Command::new("sh")
                 .arg(knife_home.join("build/install.sh"))
@@ -155,7 +151,6 @@ pub fn install(program: &String) {
                 "For more information on {}, please see {}.",
                 program, github
             );
-            return;
         }
     }
 }
