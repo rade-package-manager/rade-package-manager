@@ -25,7 +25,7 @@ For more information, please visit [installer repositry](https://github.com/rade
 
 ### For Windows
 Download the installer for Windows and run it<br>
-[Download(x86_64)](https://github.com/rade-package-manager/rade-installer/releases/download/0.1/ComradePackageManagerInstaller.exe)
+[Download(x86_64)](https://github.com/rade-package-manager/rade-installer/releases/download/0.1/ComradeInstaller.exe)
 <br>
 After installation, pass the patch to $HOME\\.comrade\bin.
 > [!WARNING]
