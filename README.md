@@ -28,7 +28,8 @@ Download the installer for Windows and run it<br>
 [Download(x86_64)](https://github.com/rade-package-manager/rade-installer/releases/download/0.1/ComradePackageManagerInstaller.exe)
 <br>
 After installation, pass the patch to $HOME\.comrade\bin.
-
+> [!WARNING]
+> Although it also works on Windows, we recommend using a terminal emulator such as Git Bash. Also, for Windows, it is necessary to separately install git and sh.
 
 ## Usage
 - **Install a package**:
