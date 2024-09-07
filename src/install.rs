@@ -144,7 +144,8 @@ pub fn install(program: &String) {
             );
             fs::remove_dir_all(knife_home.join("build/")).expect("Failed to remove dir");
             println!("{} {}", ">>>".green().bold(), "Fill in the log...".bold());
-            log::Name::set(&knife_home.join("log/install/")).create(program.clone(), exe.as_str());
+            let _ = log::Name::new(&knife_home.join("log/install/"))
+                .create(program.as_str(), exe.as_str());
             println!("{}", "All done!".bold());
             println!("Installation is complete");
             println!(

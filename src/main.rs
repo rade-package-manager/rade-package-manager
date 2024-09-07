@@ -8,6 +8,7 @@ mod info;
 mod install;
 mod list;
 mod log;
+mod logparser;
 mod search;
 use clap::{Parser, Subcommand, ValueEnum};
 
@@ -67,7 +68,7 @@ fn main() {
                 log::new();
             }
             Logs::Status => {
-                todo!();
+                log::status();
             }
             Logs::Search => {
                 todo!();
