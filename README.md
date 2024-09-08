@@ -45,6 +45,8 @@ After installation, pass the patch to $HOME\\.comrade\bin.
 
 ## Contributing
 See [CONTRIBUTING.md](./CONTRIBUTING.md)
+If you would like to contribute, please visit the following websites Perhaps it will help.
+[comrade package manager document for developer](https://rade-package-manager.github.io/rade-package-manager-document.github.io/)
 
 ## License
 <br>
