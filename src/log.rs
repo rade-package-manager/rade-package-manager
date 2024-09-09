@@ -16,7 +16,7 @@ impl<'a> Name<'a> {
     }
 
     /// create package log files.
-    pub fn create(&self, package: &str, context: &str) -> Result<(), std::io::Error> {
+    pub fn create(&self, package: &str, _install: &str, url: String) -> Result<(), std::io::Error> {
         let _name = self.basedir.join(package);
         println!(
             "{} {}",
@@ -24,17 +24,21 @@ impl<'a> Name<'a> {
             _name.display().to_string().as_str().bold()
         );
         let mut fis = fs::File::create(&_name)?;
-        let _time = "[time]\n";
-        let _install = "\n\n[install]\n";
         let utc = Utc::now();
         let data = format!("{}-{}-{}\n", utc.year(), utc.month(), utc.day());
         let time = utc.time().format("%H:%M:%S").to_string();
-        fis.write_all(_time.as_bytes())?;
+        fis.write_all("[time]\n".as_bytes())?;
         fis.write_all(data.as_bytes())?;
         fis.write_all(time.as_bytes())?;
+        fis.write_all("\n\n[install]\n".as_bytes())?;
         fis.write_all(_install.as_bytes())?;
-        fis.write_all(context.as_bytes())?;
+        fis.write_all("\n[repositry]\n".as_bytes())?;
+        fis.write_all(url.as_bytes())?;
         Ok(())
+    }
+    pub fn remove_program(&self, pkgname: &String) {
+        let _name = self.basedir.join(pkgname);
+        fs::remove_file(_name).expect("Failed to remove log");
     }
 }
 

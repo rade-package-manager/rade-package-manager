@@ -41,6 +41,9 @@ enum Cli {
     Log {
         logs: Logs,
     },
+    Remove {
+        package: String,
+    },
 }
 
 fn main() {
@@ -75,5 +78,8 @@ fn main() {
                 todo!();
             }
         },
+        Cli::Remove { package } => {
+            remove::remove(package);
+        }
     }
 }

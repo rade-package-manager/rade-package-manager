@@ -6,7 +6,7 @@ use std::fs;
 use std::io;
 use std::io::BufRead;
 
-pub fn program_exists(packagename: String) -> bool {
+pub fn program_exists(packagename: &String) -> bool {
     let dir_path = dirs::home_dir()
         .expect("Failed to get home directory")
         .join(".comrade/log/install");
@@ -29,39 +29,69 @@ pub fn program_exists(packagename: String) -> bool {
     for entry in dir.flatten() {
         if entry.file_name() == <String as AsRef<OsStr>>::as_ref(&packagename) {
             found = true;
-            let target = entry.path();
-            if target.is_dir() {
-                ret = true;
-            } else {
-                found = false;
-            }
-
+            ret = true;
             break;
         }
     }
 
     if !found {
-        println!("Program not found: {}", &packagename);
+        println!(
+            "{} {}{}",
+            ">>>".red().bold(),
+            "Program not found: ".bold(),
+            &packagename.bold()
+        );
         ret = false;
     }
     ret
 }
 
-pub fn get_exec_name(packagename: String) {
+pub fn get_exec_name(packagename: &String) -> (String, String) {
     let installdir = home_dir()
         .expect("Failed to get home dir")
         .join(".comrade/log/install/");
     let base = format!("{}{}", installdir.display(), &packagename);
+    println!("{} {}", "==>".bold().blue(), &base.as_str().bold());
     let mut _install = false;
-    let mut pkgname = "Error";
+    let mut rep = false;
+    let mut repo = "Error".to_string();
+    let mut pkgname = "Error".to_string();
     for result in io::BufReader::new(fs::File::open(base).expect("Failed to open file")).lines() {
         let l = result.unwrap();
-        let l = l.trim();
-        if l == "[install]" {
+        if l.trim() == "[repositry]" {
+            _install = false;
+            rep = true;
+            continue;
+        } else if l.trim() == "[install]" {
             _install = true;
+            rep = false;
+            continue;
         }
         if _install {
             pkgname = l.clone();
         }
+
+        if rep {
+            repo = l.clone();
+        }
     }
+    if pkgname == "Error" {
+        eprintln!(
+            "{} {}",
+            ">>>".red().bold(),
+            "Failed to load executable file name".bold()
+        );
+        eprintln!("{}", "Please report this issue to the comrade repository");
+        std::process::exit(1);
+    }
+    if repo == "Error" {
+        eprintln!(
+            "{} {}",
+            ">>>".red().bold(),
+            "Failed to load repositry url".bold()
+        );
+        eprintln!("{}", "Please report this issue to the comrade repository");
+        std::process::exit(1);
+    }
+    (pkgname.trim().to_string(), repo)
 }

@@ -50,7 +50,7 @@ pub fn install(program: &String) {
         let lang: String = open_and_read_file(language.trim(), "language", "language");
 
         // get repository
-        let github: String = open_and_read_file(repository, "repository", "repository");
+        let github: String = open_and_read_file(&repository, "repository", "repository");
 
         let capa: String = open_and_read_file(capacity, "capacity", "capacity");
 
@@ -144,8 +144,11 @@ pub fn install(program: &String) {
             );
             fs::remove_dir_all(knife_home.join("build/")).expect("Failed to remove dir");
             println!("{} {}", ">>>".green().bold(), "Fill in the log...".bold());
-            let _ = log::Name::new(&knife_home.join("log/install/"))
-                .create(program.as_str(), exe.as_str());
+            let _ = log::Name::new(&knife_home.join("log/install/")).create(
+                program.as_str(),
+                exe.as_str(),
+                github.to_string(),
+            );
             println!("{}", "All done!".bold());
             println!("Installation is complete");
             println!(
