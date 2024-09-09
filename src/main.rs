@@ -38,12 +38,10 @@ enum Cli {
         /// The package name (for install command)
         package: String,
     },
-    Log {
-        logs: Logs,
-    },
-    Remove {
-        package: String,
-    },
+    /// Rade log managements
+    Log { logs: Logs },
+    /// Remove the package
+    Remove { package: String },
 }
 
 fn main() {
