@@ -9,6 +9,7 @@ mod install;
 mod list;
 mod log;
 mod logparser;
+mod remove;
 mod search;
 use clap::{Parser, Subcommand, ValueEnum};
 

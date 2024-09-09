@@ -13,14 +13,16 @@ pub fn search_program(program: &String) -> bool {
 
     let dir = match fs::read_dir(&dir_path) {
         Ok(dir) => dir,
-        Err(_) => {
+        Err(e) => {
             eprintln!(
-                "{}{}{}{}{}",
+                "{}{}{}{}{}{}{}",
                 ">>> ".red().bold(),
                 "Failed to retrieve package list.\n".bold(),
                 "please run ".bold(),
                 "rade update ".cyan(),
-                "to retrieve package list".bold()
+                "to retrieve package list.".bold(),
+                "Error code:",
+                e
             );
             return false;
         }

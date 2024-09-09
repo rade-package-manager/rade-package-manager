@@ -1,4 +1,4 @@
-use chrono::Datelike;
+use chrono::{Datelike, Utc};
 use colored::Colorize;
 use dirs::home_dir;
 use std::fs;
@@ -24,6 +24,15 @@ impl<'a> Name<'a> {
             _name.display().to_string().as_str().bold()
         );
         let mut fis = fs::File::create(&_name)?;
+        let _time = "[time]\n";
+        let _install = "\n\n[install]\n";
+        let utc = Utc::now();
+        let data = format!("{}-{}-{}\n", utc.year(), utc.month(), utc.day());
+        let time = utc.time().format("%H:%M:%S").to_string();
+        fis.write_all(_time.as_bytes())?;
+        fis.write_all(data.as_bytes())?;
+        fis.write_all(time.as_bytes())?;
+        fis.write_all(_install.as_bytes())?;
         fis.write_all(context.as_bytes())?;
         Ok(())
     }
@@ -82,7 +91,6 @@ pub fn new() {
         let utc = chrono::Utc::now();
         let data = format!("utc: {}-{}-{}\n", utc.year(), utc.month(), utc.day());
         let time = utc.time().format("%H:%M:%S").to_string();
-        let _install = "[install]\n\n";
         let _status = "[status]\n";
         let installed = "\ninstall: 0\n";
         let time = format!("time: {}", time);
@@ -90,8 +98,6 @@ pub fn new() {
         io::stdout().flush().unwrap();
         println!("{}", time.as_str().bold());
         println!("{} {}", ">>>".green().bold(), "Create log status...");
-        fl.write_all(_install.as_bytes())
-            .expect("Failed to write log");
         fl.write_all(_status.as_bytes())
             .expect("Failed to write log");
         fl.write_all(data.as_bytes()).expect("Failed to write log");
