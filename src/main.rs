@@ -21,7 +21,7 @@ enum Logs {
 }
 
 #[derive(Parser)]
-#[command(version = "0.6.1")]
+#[command(version = "0.7")]
 /// A simple, fast, and safe package manager
 enum Cli {
     /// Update the package list
