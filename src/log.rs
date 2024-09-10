@@ -16,7 +16,13 @@ impl<'a> Name<'a> {
     }
 
     /// create package log files.
-    pub fn create(&self, package: &str, _install: &str, url: String) -> Result<(), std::io::Error> {
+    pub fn create(
+        &self,
+        package: &str,
+        _install: &str,
+        url: String,
+        version: String,
+    ) -> Result<(), std::io::Error> {
         let _name = self.basedir.join(package);
         println!(
             "{} {}",
@@ -32,7 +38,9 @@ impl<'a> Name<'a> {
         fis.write_all(time.as_bytes())?;
         fis.write_all("\n\n[install]\n".as_bytes())?;
         fis.write_all(_install.as_bytes())?;
-        fis.write_all("\n[repositry]\n".as_bytes())?;
+        fis.write_all("\n\n[version]\n".as_bytes())?;
+        fis.write_all(version.as_bytes())?;
+        fis.write_all("\n\n[repositry]\n".as_bytes())?;
         fis.write_all(url.as_bytes())?;
         Ok(())
     }

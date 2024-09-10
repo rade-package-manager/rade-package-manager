@@ -6,6 +6,8 @@ use std::fs;
 use std::io;
 use std::io::BufRead;
 
+use crate::Package;
+
 pub fn program_exists(packagename: &String) -> bool {
     let dir_path = dirs::home_dir()
         .expect("Failed to get home directory")
@@ -45,53 +47,79 @@ pub fn program_exists(packagename: &String) -> bool {
     }
     ret
 }
-
-pub fn get_exec_name(packagename: &String) -> (String, String) {
-    let installdir = home_dir()
-        .expect("Failed to get home dir")
-        .join(".comrade/log/install/");
-    let base = format!("{}{}", installdir.display(), &packagename);
-    println!("{} {}", "==>".bold().blue(), &base.as_str().bold());
-    let mut _install = false;
-    let mut rep = false;
-    let mut repo = "Error".to_string();
-    let mut pkgname = "Error".to_string();
-    for result in io::BufReader::new(fs::File::open(base).expect("Failed to open file")).lines() {
-        let l = result.unwrap();
-        if l.trim() == "[repositry]" {
-            _install = false;
-            rep = true;
-            continue;
-        } else if l.trim() == "[install]" {
-            _install = true;
-            rep = false;
-            continue;
+impl Package {
+    /// # log_parse
+    /// log paeser.
+    /// ## usage
+    /// `Package::log_parse(_package_name_)`
+    ///
+    /// ## return
+    /// this function is return the taple
+    /// `(String, String, String)`
+    /// return list is
+    /// `(executable_name, repositry_url, package_version)`
+    pub fn log_parse(packagename: &String) -> (String, String, String) {
+        let installdir = home_dir()
+            .expect("Failed to get home dir")
+            .join(".comrade/log/install/");
+        let base = format!("{}{}", installdir.display(), &packagename);
+        println!("{} {}", "==>".bold().blue(), &base.as_str().bold());
+        let mut _install = false;
+        let mut rep = false;
+        let mut ver = false;
+        let mut repo = "Error".to_string();
+        let mut pkgname = "Error".to_string();
+        let mut version = "Error".to_string();
+        for result in io::BufReader::new(fs::File::open(base).expect("Failed to open file")).lines()
+        {
+            let l = result.unwrap();
+            if l.trim() == "[repositry]" {
+                _install = false;
+                rep = true;
+                ver = false;
+                continue;
+            } else if l.trim() == "[install]" {
+                _install = true;
+                rep = false;
+                ver = false;
+                continue;
+            } else if l.trim() == "[version]" {
+                _install = false;
+                rep = false;
+                ver = true;
+                continue;
+            } else if l.trim() == "" {
+                continue;
+            }
+            if _install {
+                pkgname = l.clone();
+            } else if rep {
+                repo = l.clone();
+            } else if ver {
+                version = l.clone();
+            }
         }
-        if _install {
-            pkgname = l.clone();
+        if pkgname == "Error" {
+            eprintln!(
+                "{} {}",
+                ">>>".red().bold(),
+                "Failed to load executable file name".bold()
+            );
+            eprintln!("{}", "Please report this issue to the comrade repository");
+            std::process::exit(1);
         }
-
-        if rep {
-            repo = l.clone();
+        if repo == "Error" {
+            eprintln!(
+                "{} {}",
+                ">>>".red().bold(),
+                "Failed to load repositry url".bold()
+            );
+            eprintln!("{}", "Please report this issue to the comrade repository");
+            std::process::exit(1);
         }
+        if version == "Error" {
+            version = "Unable to output version due to old package".to_string();
+        }
+        (pkgname.trim().to_string(), repo, version)
     }
-    if pkgname == "Error" {
-        eprintln!(
-            "{} {}",
-            ">>>".red().bold(),
-            "Failed to load executable file name".bold()
-        );
-        eprintln!("{}", "Please report this issue to the comrade repository");
-        std::process::exit(1);
-    }
-    if repo == "Error" {
-        eprintln!(
-            "{} {}",
-            ">>>".red().bold(),
-            "Failed to load repositry url".bold()
-        );
-        eprintln!("{}", "Please report this issue to the comrade repository");
-        std::process::exit(1);
-    }
-    (pkgname.trim().to_string(), repo)
 }

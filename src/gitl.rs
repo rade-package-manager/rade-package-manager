@@ -3,6 +3,8 @@
 // This software is licensed under the MIT License.
 
 #![allow(warnings)]
+use crate::install;
+use crate::Package;
 use colored::*;
 use dirs::home_dir;
 use git2::Repository;
@@ -12,55 +14,115 @@ use std::fs;
 use std::io;
 use std::io::Write;
 
-/// update knife package list
-pub fn update_package_list() {
-    let url = "https://github.com/rade-package-manager/rade-package-list";
-    let home = match home_dir() {
-        Some(path) => path,
-        None => {
-            eprintln!("Failed to obtain home directory.\nPlease report this issue to the Knife repository along with the operating system used.
+impl Package {
+    /// ## update_package_list
+    ///
+    /// this function is update packagelists
+    ///
+    /// ### Usage
+    /// ```rust
+    /// Package::update_package_list();
+    /// ```
+    ///
+    pub fn update_package_list() {
+        let url = "https://github.com/rade-package-manager/rade-package-list";
+        let home = match home_dir() {
+            Some(path) => path,
+            None => {
+                eprintln!("Failed to obtain home directory.\nPlease report this issue to the Knife repository along with the operating system used.
 Error");
-            std::process::exit(1);
-        }
-    };
-    let path = home.join(".comrade/packagelist");
-    // remove the packagelist
-    println!(
-        "{} {}",
-        ">>>".green().bold(),
-        "updateing package list".bold()
-    );
-    if path.exists() {
+                std::process::exit(1);
+            }
+        };
+        let path = home.join(".comrade/packagelist");
+        // remove the packagelist
         println!(
-            "{} {} {}..",
+            "{} {}",
             ">>>".green().bold(),
-            "removing".bold(),
-            path.display().to_string().as_str().bold()
+            "updateing package list".bold()
         );
-        if let Err(er) = fs::remove_dir_all(&path) {
-            eprintln!("{}{}", "Could not delete directory.\n Please report this issue to the comrade repository\n Error code: ".red(),er);
+        if path.exists() {
+            println!(
+                "{} {} {}..",
+                ">>>".green().bold(),
+                "removing".bold(),
+                path.display().to_string().as_str().bold()
+            );
+            if let Err(er) = fs::remove_dir_all(&path) {
+                eprintln!("{}{}", "Could not delete directory.\n Please report this issue to the comrade repository\n Error code: ".red(),er);
+                std::process::exit(1);
+            }
+        }
+        // clone the packagelist
+        println!(
+            "{} {} {}",
+            ">>>".green().bold(),
+            "Cloning ".bold(),
+            url.bold()
+        );
+        if let Err(error) = Repository::clone(url, &path) {
+            eprintln!("{} {}{}",">>>".red().bold(),"Failed to retrieve package list.\nPlease submit this issue to the comrade repository.\nError code:".bold(),error);
+
             std::process::exit(1);
         }
+        let ps = path.join(".git");
+        fs::remove_dir_all(ps).unwrap();
+        println!("{}", "Successfully updated package list!".bold());
     }
-    // clone the packagelist
-    println!(
-        "{} {} {}",
-        ">>>".green().bold(),
-        "Cloning ".bold(),
-        url.bold()
-    );
-    if let Err(error) = Repository::clone(url, &path) {
-        eprintln!("{} {}{}",">>>".red().bold(),"Failed to retrieve package list.\nPlease submit this issue to the comrade repository.\nError code:".bold(),error);
-
-        std::process::exit(1);
-    }
-    let ps = path.join(".git");
-    fs::remove_dir_all(ps).unwrap();
-    println!("{}", "Successfully updated package list!".bold());
 }
 
 /// upgrade knife
-pub fn upgrade_knife(knife_version: String) {
+pub fn upgrade_rade(knife_version: String) {
+    println!(
+        "{} {}\n",
+        ">>>".green().bold(),
+        "Checking for package updates...".bold()
+    );
+    Package::update_package_list();
+    let rade_home = home_dir()
+        .expect("Failed to get home directory")
+        .join(".comrade/");
+    let pkglist = rade_home.join("log/install/");
+    println!("");
+    for entry in pkglist
+        .read_dir()
+        .expect("Failed to read log/install directory")
+    {
+        let entry = &entry.unwrap().file_name().into_string().unwrap();
+        println!(
+            "{} {}",
+            ">>>".yellow().bold(),
+            "Get the current latest version...".bold()
+        );
+        let pkginfo = Package::log_parse(entry);
+        let version = pkginfo.2;
+        let npkginfo = Package::get_package_infos(entry);
+        let npkgv = npkginfo.2;
+        if version != npkgv {
+            println!(
+                "{}: {} → {}",
+                entry.as_str().yellow().bold(),
+                version.as_str().blue().bold(),
+                npkgv.as_str().green().bold()
+            );
+            println!(
+                "{} {}{}",
+                "upgrade".bold(),
+                entry.as_str().bold(),
+                "?".bold()
+            );
+            let mut _str = String::new();
+            print!("[y/n] ");
+            io::stdout().flush().unwrap();
+            io::stdin().read_line(&mut _str).unwrap();
+            if ["y", "yes", ""].contains(&_str.trim()) {
+                Package::remove(entry, true);
+                Package::install(entry, true);
+            }
+        }
+    }
+    println!("");
+
     // Confirmation of the version available for pickup
     let upgrading_version = "https://17do.github.io/knife-installer.github.io/";
 

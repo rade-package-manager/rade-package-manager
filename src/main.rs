@@ -20,6 +20,8 @@ enum Logs {
     Search,
 }
 
+pub struct Package;
+
 #[derive(Parser)]
 #[command(version = "0.7")]
 /// A simple, fast, and safe package manager
@@ -49,14 +51,14 @@ fn main() {
     let args = Cli::parse();
     match args {
         Cli::Update => {
-            gitl::update_package_list();
+            Package::update_package_list();
             std::process::exit(0);
         }
         Cli::Upgrade => {
-            gitl::upgrade_knife(version.to_string());
+            gitl::upgrade_rade(version.to_string());
         }
         Cli::Install { package } => {
-            install::install(&package);
+            Package::install(&package, false);
         }
         Cli::List { installed } => {
             if installed {
@@ -77,7 +79,7 @@ fn main() {
             }
         },
         Cli::Remove { package } => {
-            remove::remove(package);
+            Package::remove(&package, false);
         }
     }
 }
