@@ -1,5 +1,5 @@
 #![allow(warnings)]
-use crate::Package;
+use crate::{log, Package};
 use colored::*;
 use reqwest::blocking;
 use std::error::Error;
@@ -128,7 +128,6 @@ impl Package {
             "Remove build directory...".bold()
         );
         fs::remove_dir_all(&build_dir)?;
-
         Ok(())
     }
     fn parse_sh(path: &Path) -> Result<(), Box<dyn Error>> {

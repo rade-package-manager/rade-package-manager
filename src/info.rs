@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use crate::Package;
 
 /// comrade version.
-pub const VERSION: &str = "0.8.0";
+pub const VERSION: &str = "0.8.1";
 
 impl Package {
     /// # rade_home()

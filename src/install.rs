@@ -211,14 +211,24 @@ impl Package {
                 return;
             }
         } else if download {
-            let (lang, capa, ver, depen, github) = Package::get_package_infos(program);
-            println!("{} {}", "install package:".bold(), program);
             let mut pkg = program;
-            println!(
-                "{} {}",
-                "executable file name:".bold(),
-                Package::download_get_execname(pkg).expect("Failed to get exec_name")
-            );
+            let (lang, capa, ver, depen, github) = Package::get_package_infos(program);
+            let exe = Package::download_get_execname(pkg).expect("Failed to get exec_name");
+            let exeit = knife_home.join("bin/").join(exe.clone());
+            if exeit.exists() && !source {
+                println!(
+                    "{} {}",
+                    ">>>".red().bold(),
+                    "The program is already installed!".bold()
+                );
+                println!(
+                    "For more information about this program, please visit {}",
+                    github
+                );
+                std::process::exit(1);
+            }
+            println!("{} {}", "install package:".bold(), program);
+            println!("{} {}", "executable file name:".bold(), exe);
             println!("{} {}bytes", "capacity:".bold(), capa);
             println!("{} {}", "language:".bold(), lang);
             println!("{} {}", "versions:".bold(), ver);
@@ -236,6 +246,15 @@ impl Package {
             if ok_ == "y" || ok_ == "yes" || ok_ == "" {
                 let mut archive = Package::download_install(program, "temp");
                 Package::unpack_package(archive, program);
+                println!("{} {}", ">>>".green().bold(), "Fill in the log...".bold());
+                log::Name::new(&knife_home.join("log/install")).create(
+                    program.as_str(),
+                    Package::download_get_execname(pkg)
+                        .expect("Failed to get exec_name")
+                        .as_str(),
+                    github.to_string(),
+                    ver.to_string(),
+                );
             } else {
                 return;
             }
