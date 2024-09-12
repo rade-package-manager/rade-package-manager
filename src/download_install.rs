@@ -149,14 +149,6 @@ impl Package {
         let dir = match fs::read_dir(&packagelist) {
             Ok(dir) => dir,
             Err(_) => {
-                eprintln!(
-                    "{}{}{}{}{}",
-                    "--Error--\n".red().bold(),
-                    "Failed to retrieve package list.\n".red().bold(),
-                    "please run ".red().bold(),
-                    "rade update ".cyan(),
-                    "to retrieve package list".red().bold()
-                );
                 std::process::exit(1);
             }
         };
