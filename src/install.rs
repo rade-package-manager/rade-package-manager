@@ -95,10 +95,11 @@ impl Package {
     #[allow(dead_code)]
     pub fn install(program: &String, source: bool) {
         let search_ = search::search_program(program);
+        let download = Package::is_download_package(program).unwrap();
         let knife_home = home_dir()
             .expect("Failed to get ~/.comrade/")
             .join(".comrade/");
-        if search_ {
+        if search_ && !download {
             let (lang, capa, ver, depen, github) = Package::get_package_infos(&program);
             if home_dir()
                 .expect("failed to get home")
@@ -117,6 +118,7 @@ impl Package {
                 )
                 .expect("Failed to remove build directory");
             }
+
             println!("{} {}", ">>>".green().bold(), "Clone package...".bold());
             if Repository::clone(&github, knife_home.join("build")).is_err() {
                 eprintln!("\n{}: Failed to Clone Repository.", "Error".red());
@@ -151,16 +153,16 @@ impl Package {
             println!("{} {}", "versions:".bold(), ver);
             println!("{} {}", "dependencies:".bold(), depen);
             println!("{} {}", "repository:".bold(), github);
-            let ok_ = "yes";
+            let mut tmp = String::new();
+            let mut ok_ = "yes";
             if !source {
                 println!("\n{} {}?", "install".bold(), program);
                 print!("[y/n] ");
                 io::stdout().flush().unwrap();
-                let mut ok_ = String::new();
-                io::stdin().read_line(&mut ok_).unwrap();
-                let ok_: &str = ok_.trim();
+                io::stdin().read_line(&mut tmp).unwrap();
+                ok_ = tmp.trim();
             }
-            if ["y", "yes", ""].contains(&ok_) {
+            if ok_ == "y" || ok_ == "yes" || ok_ == "" {
                 // start Installation
                 println!("{} {}", ">>>".green().bold(), "Start Installation".bold());
                 println!("{} run install.sh (build start)", ">>>".yellow().bold());
@@ -205,6 +207,37 @@ impl Package {
                         program, github
                     );
                 }
+            } else {
+                return;
+            }
+        } else if download {
+            let (lang, capa, ver, depen, github) = Package::get_package_infos(program);
+            println!("{} {}", "install package:".bold(), program);
+            let mut pkg = program;
+            println!(
+                "{} {}",
+                "executable file name:".bold(),
+                Package::download_get_execname(pkg).expect("Failed to get exec_name")
+            );
+            println!("{} {}bytes", "capacity:".bold(), capa);
+            println!("{} {}", "language:".bold(), lang);
+            println!("{} {}", "versions:".bold(), ver);
+            println!("{} {}", "dependencies:".bold(), depen);
+            println!("{} {}", "repository:".bold(), github);
+            let mut tmp = String::new();
+            let mut ok_ = "yes";
+            if !source {
+                println!("\n{} {}?", "install".bold(), program);
+                print!("[y/n] ");
+                io::stdout().flush().unwrap();
+                io::stdin().read_line(&mut tmp).unwrap();
+                ok_ = tmp.trim();
+            }
+            if ok_ == "y" || ok_ == "yes" || ok_ == "" {
+                let mut archive = Package::download_install(program, "temp");
+                Package::unpack_package(archive, program);
+            } else {
+                return;
             }
         }
     }
