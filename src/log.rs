@@ -62,16 +62,16 @@ pub fn new() {
         let mut _str = String::new();
         io::stdin().read_line(&mut _str).unwrap();
         let _str = _str.trim();
-        if _str == "y" || _str == "yes" || _str == "" {
-            println!("{} {}", ">>>".blue().bold(), "Start creating log...");
-            println!("{} {}", ">>>".green().bold(), "Deleting status file...");
+        if  ["y", "yes", ""].contains(&_str) {
+            println!("{} Start creating log...", ">>>".blue().bold());
+            println!("{} Deleting status file...", ">>>".green().bold());
             fs::remove_file(
                 home_dir()
                     .expect("Failed to get home dir.")
                     .join(".comrade/log/status"),
             )
             .expect("Failed to remove file");
-            println!("{} {}", ">>>".blue().bold(), "Start creating log...");
+            println!("{} Start creating log...", ">>>".blue().bold());
             let mut fl = fs::File::create(&ps).expect("Failed to create status file.");
             let utc = chrono::Utc::now();
             let data = format!("utc: {}-{}-{}\n", utc.year(), utc.month(), utc.day());
@@ -83,7 +83,7 @@ pub fn new() {
             print!("{}", data.as_str().bold());
             io::stdout().flush().unwrap();
             println!("{}", time.as_str().bold());
-            println!("{} {}", ">>>".green().bold(), "Create log status...");
+            println!("{} Create log status...", ">>>".green().bold());
             fl.write_all(_install.as_bytes())
                 .expect("Failed to write log");
             fl.write_all(_status.as_bytes())
@@ -98,7 +98,7 @@ pub fn new() {
             std::process::exit(1);
         }
     } else {
-        println!("{} {}", ">>>".blue().bold(), "Start creating log...");
+        println!("{} Start creating log...", ">>>".blue().bold());
         let mut fl = fs::File::create(&ps).expect("Failed to create status file.");
         let utc = chrono::Utc::now();
         let data = format!("utc: {}-{}-{}\n", utc.year(), utc.month(), utc.day());
@@ -109,7 +109,7 @@ pub fn new() {
         print!("{}", data.as_str().bold());
         io::stdout().flush().unwrap();
         println!("{}", time.as_str().bold());
-        println!("{} {}", ">>>".green().bold(), "Create log status...");
+        println!("{} Create log status...", ">>>".green().bold());
         fl.write_all(_status.as_bytes())
             .expect("Failed to write log");
         fl.write_all(data.as_bytes()).expect("Failed to write log");

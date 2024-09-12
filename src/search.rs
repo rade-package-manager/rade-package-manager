@@ -15,13 +15,12 @@ pub fn search_program(program: &String) -> bool {
         Ok(dir) => dir,
         Err(e) => {
             eprintln!(
-                "{}{}{}{}{}{}{}",
+                "{}{}{}{}{}Error code:{}",
                 ">>> ".red().bold(),
                 "Failed to retrieve package list.\n".bold(),
                 "please run ".bold(),
                 "rade update ".cyan(),
                 "to retrieve package list.".bold(),
-                "Error code:",
                 e
             );
             return false;
