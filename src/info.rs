@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2024 17do
+// This software is licensed under the MIT License.
+
 use dirs::home_dir;
 use std::path::PathBuf;
 
