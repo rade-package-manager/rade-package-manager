@@ -23,7 +23,7 @@ enum Logs {
 pub struct Package;
 
 #[derive(Parser)]
-#[command(version = "0.8.1")]
+#[command(version = "0.8.2")]
 /// A simple, fast, and safe package manager
 enum Cli {
     /// Update the package list

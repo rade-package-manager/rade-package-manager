@@ -8,7 +8,7 @@ use std::path::PathBuf;
 use crate::Package;
 
 /// comrade version.
-pub const VERSION: &str = "0.8.1";
+pub const VERSION: &str = "0.8.2";
 
 impl Package {
     /// # rade_home()
