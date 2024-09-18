@@ -5,18 +5,27 @@
 #![allow(warnings)]
 use crate::{log, Package};
 use colored::*;
-use reqwest::blocking;
+use indicatif::{ProgressBar, ProgressStyle};
+use reqwest::blocking::get;
+use reqwest::{blocking, blocking::Client};
 use std::error::Error;
 use std::ffi::OsStr;
 use std::fs::File;
-use std::io::{self, copy, BufRead, BufReader, Write};
+use std::io::{self, copy, BufRead, BufReader, Read, Write};
+use std::mem::replace;
 use std::path::Path;
 use std::result::Result;
+use std::thread::sleep;
+use std::time::Duration;
 use std::{env, fs, process};
 use zip::read::ZipArchive;
 
 impl Package {
-    pub fn download_install(package: &String, output: &str) -> ZipArchive<BufReader<File>> {
+    pub fn download_install(
+        package: &String,
+    ) -> Result<ZipArchive<BufReader<File>>, Box<dyn Error>> {
+        let temp = Package::rade_packagelist().join("temp");
+        let output = temp.to_str().unwrap();
         let (url, downloadfilename) = if std::env::consts::OS == "windows" {
             (format!(
             "https://github.com/rade-package-manager/rade-download-lists/releases/download/{}/{}-x86_64-pc-windows-gnu.radepkg",
@@ -29,11 +38,15 @@ impl Package {
             package, package
         ),format!("{}-aarch64-apple-darwin.radepkg",package)
         )
-        } else {
+        } else if std::env::consts::OS == "linux" {
             (format!(
             "https://github.com/rade-package-manager/rade-download-lists/releases/download/{}/{}-x86_64-unknown-linux-gnu.radepkg",
             package, package),format!("{}-x86_64-unknown-linux-gnu.radepkg",package)
         )
+        } else {
+            eprintln!("Not support os.");
+            std::process::exit(1);
+            ("".to_string(), "".to_string())
         };
         println!(
             "{} {} {}",
@@ -41,15 +54,41 @@ impl Package {
             "Downloading".bold(),
             downloadfilename
         );
-        let response = blocking::get(url.clone()).unwrap(); // unwrapに変更
-        let mut file = File::create(output).unwrap(); // unwrapに変更
-        let mut content = BufReader::new(response);
-        copy(&mut content, &mut file).unwrap(); // unwrapに変更
-        file.flush().unwrap(); // unwrapに変更
-        let file = File::open(output).unwrap(); // unwrapに変更
+        let client = Client::new();
+
+        let response = client.head(url.clone()).send()?;
+        let total_size = response
+            .headers()
+            .get(reqwest::header::CONTENT_LENGTH)
+            .and_then(|len| len.to_str().ok())
+            .and_then(|len| len.parse().ok())
+            .unwrap_or(0);
+
+        let progress_bar = ProgressBar::new(total_size);
+        progress_bar.set_style(
+            ProgressStyle::default_bar()
+                .template("[{bar:40.cyan/blue}] {bytes}/{total_bytes} ({eta})")?
+                .progress_chars("###"),
+        );
+        let mut downloaded: u64 = 0;
+        let mut buffer = vec![0; 8192];
+        let mut response = client.get(url.clone()).send()?;
+        let mut file = File::create(output.clone())?;
+        while let Ok(n) = response.read(&mut buffer) {
+            if n == 0 {
+                break;
+            }
+            file.write_all(&buffer[..n])?;
+            downloaded += n as u64;
+            progress_bar.set_position(downloaded);
+        }
+
+        file.flush()?;
+        let file = File::open(output)?;
+        progress_bar.finish();
         let mut reader = BufReader::new(file);
-        let mut archive = ZipArchive::new(reader).unwrap(); // unwrapに変更
-        return archive;
+        let mut archive = ZipArchive::new(reader)?;
+        return Ok(archive);
     }
 
     pub fn unpack_package(

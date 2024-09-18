@@ -117,7 +117,7 @@ pub fn upgrade_rade(knife_version: String) {
             io::stdin().read_line(&mut _str).unwrap();
             if ["y", "yes", ""].contains(&_str.trim()) {
                 Package::remove(entry, true);
-                Package::install(entry, true);
+                Package::install(entry, true, false);
             }
         }
     }

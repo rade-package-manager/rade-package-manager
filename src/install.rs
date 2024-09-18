@@ -93,9 +93,12 @@ impl Package {
     /// ```
     ///
     #[allow(dead_code)]
-    pub fn install(program: &String, source: bool) {
+    pub fn install(program: &String, source: bool, build: bool) {
         let search_ = search::search_program(program);
-        let download = Package::is_download_package(program).unwrap();
+        let mut download = false;
+        if !build {
+            download = Package::is_download_package(program).unwrap();
+        }
         let knife_home = home_dir()
             .expect("Failed to get ~/.comrade/")
             .join(".comrade/");
@@ -244,8 +247,8 @@ impl Package {
                 ok_ = tmp.trim();
             }
             if ok_ == "y" || ok_ == "yes" || ok_ == "" {
-                let mut archive = Package::download_install(program, "temp");
-                Package::unpack_package(archive, program);
+                let mut archive = Package::download_install(program);
+                Package::unpack_package(archive.unwrap(), program);
                 println!("{} {}", ">>>".green().bold(), "Fill in the log...".bold());
                 log::Name::new(&knife_home.join("log/install")).create(
                     program.as_str(),

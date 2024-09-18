@@ -12,6 +12,7 @@ mod logparser;
 mod remove;
 mod search;
 use clap::{Parser, Subcommand, ValueEnum};
+use colored::Colorize;
 
 #[derive(Subcommand, ValueEnum, Clone)]
 enum Logs {
@@ -19,7 +20,6 @@ enum Logs {
     New,
     Search,
 }
-
 pub struct Package;
 
 #[derive(Parser)]
@@ -39,6 +39,8 @@ enum Cli {
     Install {
         /// The package name (for install command)
         package: String,
+        #[arg(short, long, action = clap::ArgAction::SetTrue)]
+        build: bool,
     },
     /// Rade log managements
     Log { logs: Logs },
@@ -57,8 +59,13 @@ fn main() {
         Cli::Upgrade => {
             gitl::upgrade_rade(version.to_string());
         }
-        Cli::Install { package } => {
-            Package::install(&package, false);
+        Cli::Install { package, build } => {
+            if build {
+                println!("{} {}", ">>>".yellow().bold(), "Selected build".bold());
+                Package::install(&package, false, true);
+            } else {
+                Package::install(&package, false, false);
+            }
         }
         Cli::List { installed } => {
             if installed {
