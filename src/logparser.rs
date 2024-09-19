@@ -2,17 +2,17 @@
 // Copyright (c) 2024 17do
 // This software is licensed under the MIT License.
 
-#![allow(warnings)]
 use colored::*;
 use dirs::home_dir;
 use std::ffi::OsStr;
-use std::fs;
-use std::io;
-use std::io::BufRead;
+use std::{
+    fs,
+    io::{self, BufRead},
+};
 
 use crate::Package;
 
-pub fn program_exists(packagename: &String) -> bool {
+pub fn program_exists(packagename: &str) -> bool {
     let dir_path = dirs::home_dir()
         .expect("Failed to get home directory")
         .join(".comrade/log/install");
@@ -20,11 +20,9 @@ pub fn program_exists(packagename: &String) -> bool {
         Ok(dir) => dir,
         Err(e) => {
             eprintln!(
-                "{}{}{}{}{}",
+                "{}{}Please report this issue to the comrade package manager repositoryError code: {}",
                 ">>> ".red().bold(),
                 "Failed to read log files.\n".bold(),
-                "Please report this issue to the comrade package manager repository",
-                "Error code: ",
                 e
             );
             return false;
@@ -33,7 +31,7 @@ pub fn program_exists(packagename: &String) -> bool {
     let mut found: bool = false;
     let mut ret: bool = false;
     for entry in dir.flatten() {
-        if entry.file_name() == <String as AsRef<OsStr>>::as_ref(&packagename) {
+        if entry.file_name() == <&str as AsRef<OsStr>>::as_ref(&packagename) {
             found = true;
             ret = true;
             break;
@@ -62,7 +60,7 @@ impl Package {
     /// `(String, String, String)`
     /// return list is
     /// `(executable_name, repositry_url, package_version)`
-    pub fn log_parse(packagename: &String) -> (String, String, String) {
+    pub fn log_parse(packagename: &str) -> (String, String, String) {
         let installdir = home_dir()
             .expect("Failed to get home dir")
             .join(".comrade/log/install/");
@@ -92,15 +90,15 @@ impl Package {
                 rep = false;
                 ver = true;
                 continue;
-            } else if l.trim() == "" {
+            } else if l.trim().is_empty() {
                 continue;
             }
             if _install {
-                pkgname = l.clone();
+                pkgname = l;
             } else if rep {
-                repo = l.clone();
+                repo = l;
             } else if ver {
-                version = l.clone();
+                version = l;
             }
         }
         if pkgname == "Error" {
@@ -109,7 +107,7 @@ impl Package {
                 ">>>".red().bold(),
                 "Failed to load executable file name".bold()
             );
-            eprintln!("{}", "Please report this issue to the comrade repository");
+            eprintln!("Please report this issue to the comrade repository");
             std::process::exit(1);
         }
         if repo == "Error" {
@@ -118,7 +116,7 @@ impl Package {
                 ">>>".red().bold(),
                 "Failed to load repositry url".bold()
             );
-            eprintln!("{}", "Please report this issue to the comrade repository");
+            eprintln!("Please report this issue to the comrade repository");
             std::process::exit(1);
         }
         if version == "Error" {

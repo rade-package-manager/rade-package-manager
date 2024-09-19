@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2024 17do
 // This software is licensed under the MIT License.
-#![allow(warnings)]
 
-use crate::log;
-use crate::Package;
-use crate::{install, search};
+use crate::{
+    log, Package, {install, search},
+};
 use colored::*;
 use dirs::home_dir;
 use git2::Repository;
@@ -29,17 +28,16 @@ impl Package {
     /// ```rust
     /// (language, capacity, version, dependencies, repository)
     /// ```
-    #[allow(dead_code)]
-    pub fn get_package_infos(program: &String) -> (String, String, String, String, String) {
+    pub fn get_package_infos(program: &str) -> (String, String, String, String, String) {
         let knife_home = home_dir()
             .expect("Failed to get ~/.comrade/")
             .join(".comrade/");
-        let basepath = format!("{}{}", knife_home.join("packagelist/").display(), &program);
-        let dependencies = format!("{}{}", basepath, "/dependencies");
-        let language = format!("{}{}", basepath, "/language");
-        let repository = format!("{}{}", basepath, "/repository");
-        let capacity = format!("{}{}", basepath, "/capacity");
-        let version = format!("{}{}", basepath, "/version");
+        let basepath = knife_home.join("packagelist/").join(program);
+        let dependencies = basepath.join("dependencies");
+        let language = basepath.join("language");
+        let repository = basepath.join("repository");
+        let capacity = basepath.join("capacity");
+        let version = basepath.join("version");
 
         fn open_and_read_file<P: AsRef<Path>>(path: P, read: &str, get: &str) -> String {
             match File::open(path) {
@@ -61,7 +59,7 @@ impl Package {
         let depen: String = open_and_read_file(dependencies, "file", "dependencies");
 
         // get language
-        let lang: String = open_and_read_file(language.trim(), "language", "language");
+        let lang: String = open_and_read_file(language, "language", "language");
 
         // get repository
         let github: String = open_and_read_file(&repository, "repository", "repository");
@@ -92,8 +90,7 @@ impl Package {
     /// install::Package::install(_install_package_name);
     /// ```
     ///
-    #[allow(dead_code)]
-    pub fn install(program: &String, source: bool, build: bool) {
+    pub fn install(program: &str, source: bool, build: bool) {
         let search_ = search::search_program(program);
         let mut download = false;
         if !build {
@@ -103,7 +100,7 @@ impl Package {
             .expect("Failed to get ~/.comrade/")
             .join(".comrade/");
         if search_ && !download {
-            let (lang, capa, ver, depen, github) = Package::get_package_infos(&program);
+            let (lang, capa, ver, depen, github) = Package::get_package_infos(program);
             if home_dir()
                 .expect("failed to get home")
                 .join(".comrade/build")
@@ -165,7 +162,7 @@ impl Package {
                 io::stdin().read_line(&mut tmp).unwrap();
                 ok_ = tmp.trim();
             }
-            if ok_ == "y" || ok_ == "yes" || ok_ == "" {
+            if ["y", "yes", ""].contains(&ok_) {
                 // start Installation
                 println!("{} {}", ">>>".green().bold(), "Start Installation".bold());
                 println!("{} run install.sh (build start)", ">>>".yellow().bold());
@@ -197,7 +194,7 @@ impl Package {
                 fs::remove_dir_all(knife_home.join("build/")).expect("Failed to remove dir");
                 println!("{} {}", ">>>".green().bold(), "Fill in the log...".bold());
                 let _ = log::Name::new(&knife_home.join("log/install/")).create(
-                    program.as_str(),
+                    program,
                     exe.as_str(),
                     github.to_string(),
                     ver.to_string(),
@@ -210,14 +207,12 @@ impl Package {
                         program, github
                     );
                 }
-            } else {
-                return;
             }
         } else if download {
-            let mut pkg = program;
+            let pkg = program;
             let (lang, capa, ver, depen, github) = Package::get_package_infos(program);
             let exe = Package::download_get_execname(pkg).expect("Failed to get exec_name");
-            let exeit = knife_home.join("bin/").join(exe.clone());
+            let exeit = knife_home.join("bin/").join(&exe);
             if exeit.exists() && !source {
                 println!(
                     "{} {}",
@@ -246,12 +241,12 @@ impl Package {
                 io::stdin().read_line(&mut tmp).unwrap();
                 ok_ = tmp.trim();
             }
-            if ok_ == "y" || ok_ == "yes" || ok_ == "" {
-                let mut archive = Package::download_install(program);
-                Package::unpack_package(archive.unwrap(), program);
+            if ["y", "yes", ""].contains(&ok_) {
+                let archive = Package::download_install(program);
+                let _ = Package::unpack_package(archive.unwrap(), program);
                 println!("{} {}", ">>>".green().bold(), "Fill in the log...".bold());
-                log::Name::new(&knife_home.join("log/install")).create(
-                    program.as_str(),
+                let _ = log::Name::new(&knife_home.join("log/install")).create(
+                    program,
                     Package::download_get_execname(pkg)
                         .expect("Failed to get exec_name")
                         .as_str(),
@@ -265,7 +260,7 @@ impl Package {
     }
 }
 
-pub fn get_program_name(build_dir: String, program: &String) -> String {
+pub fn get_program_name(build_dir: String, program: &str) -> String {
     // build_dir
     let exe_name = Path::new(&build_dir).join(".comrade/exe_name");
     if !exe_name.exists() {

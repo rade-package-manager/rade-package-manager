@@ -2,67 +2,69 @@
 // Copyright (c) 2024 17do
 // This software is licensed under the MIT License.
 
-#![allow(warnings)]
-use crate::{log, Package};
+use crate::Package;
 use colored::*;
 use indicatif::{ProgressBar, ProgressStyle};
-use reqwest::blocking::get;
-use reqwest::{blocking, blocking::Client};
-use std::error::Error;
-use std::ffi::OsStr;
-use std::fs::File;
-use std::io::{self, copy, BufRead, BufReader, Read, Write};
-use std::mem::replace;
-use std::path::Path;
-use std::result::Result;
-use std::thread::sleep;
-use std::time::Duration;
-use std::{env, fs, process};
+use reqwest::blocking::Client;
+use std::{
+    error::Error,
+    ffi::OsStr,
+    fs::File,
+    io::{BufRead, BufReader, Read, Write},
+    path::Path,
+    {fs, process},
+};
 use zip::read::ZipArchive;
 
 impl Package {
-    pub fn download_install(
-        package: &String,
-    ) -> Result<ZipArchive<BufReader<File>>, Box<dyn Error>> {
+    pub fn download_install(package: &str) -> Result<ZipArchive<BufReader<File>>, Box<dyn Error>> {
         let temp = Package::rade_packagelist().join("temp");
         let output = temp.to_str().unwrap();
-        let (url, downloadfilename) = if std::env::consts::OS == "windows" {
-            (format!(
-            "https://github.com/rade-package-manager/rade-download-lists/releases/download/{}/{}-x86_64-pc-windows-gnu.radepkg",
-            package, package
-        ),format!("{}-x86_64-pc-windows-gnu.radepkg",package)
-        )
-        } else if std::env::consts::OS == "macos" {
-            (format!(
-            "https://github.com/rade-package-manager/rade-download-lists/releases/download/{}/{}-aarch64-apple-darwin.radepkg",
-            package, package
-        ),format!("{}-aarch64-apple-darwin.radepkg",package)
-        )
-        } else if std::env::consts::OS == "linux" {
-            (format!(
-            "https://github.com/rade-package-manager/rade-download-lists/releases/download/{}/{}-x86_64-unknown-linux-gnu.radepkg",
-            package, package),format!("{}-x86_64-unknown-linux-gnu.radepkg",package)
-        )
+        let (url, download_filename) = if cfg!(target_os = "windows") {
+            (
+                format!(
+                    "https://github.com/rade-package-manager/rade-download-lists/releases/download/{}/{}-x86_64-pc-windows-gnu.radepkg",
+                    package, package
+                ),
+                format!("{}-x86_64-pc-windows-gnu.radepkg", package)
+            )
+        } else if cfg!(target_os = "macos") {
+            (
+                format!(
+                    "https://github.com/rade-package-manager/rade-download-lists/releases/download/{}/{}-aarch64-apple-darwin.radepkg",
+                    package, package
+                ),
+                format!("{}-aarch64-apple-darwin.radepkg", package)
+            )
+        } else if cfg!(target_os = "linux") {
+            (
+                format!(
+                    "https://github.com/rade-package-manager/rade-download-lists/releases/download/{}/{}-x86_64-unknown-linux-gnu.radepkg",
+                    package, package
+                ),
+                format!("{}-x86_64-unknown-linux-gnu.radepkg",package)
+            )
         } else {
             eprintln!("Not support os.");
             std::process::exit(1);
-            ("".to_string(), "".to_string())
         };
+
         println!(
             "{} {} {}",
             ">>>".green().bold(),
             "Downloading".bold(),
-            downloadfilename
+            download_filename
         );
+
         let client = Client::new();
 
-        let response = client.head(url.clone()).send()?;
+        let response = client.head(&url).send()?;
         let total_size = response
             .headers()
             .get(reqwest::header::CONTENT_LENGTH)
             .and_then(|len| len.to_str().ok())
             .and_then(|len| len.parse().ok())
-            .unwrap_or(0);
+            .unwrap_or_default();
 
         let progress_bar = ProgressBar::new(total_size);
         progress_bar.set_style(
@@ -70,10 +72,11 @@ impl Package {
                 .template("[{bar:40.cyan/blue}] {bytes}/{total_bytes} ({eta})")?
                 .progress_chars("###"),
         );
+
         let mut downloaded: u64 = 0;
         let mut buffer = vec![0; 8192];
-        let mut response = client.get(url.clone()).send()?;
-        let mut file = File::create(output.clone())?;
+        let mut response = client.get(&url).send()?;
+        let mut file = File::create(output)?;
         while let Ok(n) = response.read(&mut buffer) {
             if n == 0 {
                 break;
@@ -86,14 +89,14 @@ impl Package {
         file.flush()?;
         let file = File::open(output)?;
         progress_bar.finish();
-        let mut reader = BufReader::new(file);
-        let mut archive = ZipArchive::new(reader)?;
-        return Ok(archive);
+        let reader = BufReader::new(file);
+        let archive = ZipArchive::new(reader)?;
+        Ok(archive)
     }
 
     pub fn unpack_package(
         mut archive: ZipArchive<BufReader<File>>,
-        package: &String,
+        package: &str,
     ) -> Result<(), Box<dyn Error>> {
         let build_dir = Package::rade_home().join("build/");
         if build_dir.exists() {
@@ -106,7 +109,7 @@ impl Package {
             "{} {} {}",
             ">>>".yellow().bold(),
             "Unpacking".bold(),
-            package.as_str().bold()
+            package.bold()
         );
         for i in 0..archive.len() {
             let mut file = archive.by_index(i)?;
@@ -155,7 +158,7 @@ impl Package {
         let home = Package::rade_home();
         let bin = Package::rade_home().join("bin/");
         println!("{} {}", ">>>".yellow().bold(), "Run install.sh".bold());
-        Package::parse_sh(&home.join("build/install.sh").as_path())?;
+        Package::parse_sh(&home.join("build/install.sh"))?;
 
         if !bin.is_dir() {
             panic!("Error: 'bin' is not a directory");
@@ -186,7 +189,7 @@ impl Package {
         }
         Ok(())
     }
-    pub fn is_download_package(package: &String) -> Result<bool, Box<dyn Error>> {
+    pub fn is_download_package(package: &str) -> Result<bool, Box<dyn Error>> {
         let packagelist = Package::rade_packagelist().join(package);
         let dir = match fs::read_dir(&packagelist) {
             Ok(dir) => dir,
@@ -202,7 +205,7 @@ impl Package {
         }
         Ok(false)
     }
-    pub fn download_get_execname(mut package: &String) -> Result<String, Box<dyn Error>> {
+    pub fn download_get_execname(package: &str) -> Result<String, Box<dyn Error>> {
         let pkg = format!(
             "{}{}/exec_name",
             Package::rade_packagelist().display(),
