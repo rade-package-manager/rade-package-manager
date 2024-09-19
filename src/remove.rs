@@ -2,9 +2,7 @@
 // Copyright (c) 2024 17do
 // This software is licensed under the MIT License.
 
-use crate::log;
-use crate::logparser;
-use crate::Package;
+use crate::{log, logparser, Package};
 use colored::*;
 use dirs::home_dir;
 use std::{

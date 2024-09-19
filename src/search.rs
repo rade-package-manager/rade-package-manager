@@ -47,5 +47,6 @@ pub fn search_program(program: &str) -> bool {
         println!("Program not found: {}", program);
         ret = false;
     }
+
     ret
 }

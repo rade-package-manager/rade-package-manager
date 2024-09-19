@@ -33,12 +33,14 @@ Error");
             }
         };
         let path = home.join(".comrade/packagelist");
+
         // remove the packagelist
         println!(
             "{} {}",
             ">>>".green().bold(),
             "updateing package list".bold()
         );
+
         if path.exists() {
             println!(
                 "{} {} {}..",
@@ -46,11 +48,13 @@ Error");
                 "removing".bold(),
                 path.display().to_string().as_str().bold()
             );
+
             if let Err(er) = fs::remove_dir_all(&path) {
                 eprintln!("{}{}", "Could not delete directory.\n Please report this issue to the comrade repository\n Error code: ".red(),er);
                 std::process::exit(1);
             }
         }
+
         // clone the packagelist
         println!(
             "{} {} {}",
@@ -58,11 +62,13 @@ Error");
             "Cloning ".bold(),
             url.bold()
         );
+
         if let Err(error) = Repository::clone(url, &path) {
             eprintln!("{} {}{}",">>>".red().bold(),"Failed to retrieve package list.\nPlease submit this issue to the comrade repository.\nError code:".bold(),error);
 
             std::process::exit(1);
         }
+
         let ps = path.join(".git");
         fs::remove_dir_all(ps).unwrap();
         println!("{}", "Successfully updated package list!".bold());
@@ -76,12 +82,15 @@ pub fn upgrade_rade(knife_version: String) {
         ">>>".green().bold(),
         "Checking for package updates...".bold()
     );
+
     Package::update_package_list();
     let rade_home = home_dir()
         .expect("Failed to get home directory")
         .join(".comrade/");
     let pkglist = rade_home.join("log/install/");
+
     println!();
+
     for entry in pkglist
         .read_dir()
         .expect("Failed to read log/install directory")
@@ -198,6 +207,7 @@ pub fn upgrade_rade(knife_version: String) {
                 ">>>".green().bold(),
                 "creating .comrade/packagelist".bold()
             );
+
             // clone package list
             if let Err(error) = Repository::clone(
                 "https://github.com/rade-package-manager/rade-package-list",

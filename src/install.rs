@@ -2,9 +2,9 @@
 // Copyright (c) 2024 17do
 // This software is licensed under the MIT License.
 
-use crate::log;
-use crate::Package;
-use crate::{install, search};
+use crate::{
+    log, Package, {install, search},
+};
 use colored::*;
 use dirs::home_dir;
 use git2::Repository;
@@ -32,12 +32,12 @@ impl Package {
         let knife_home = home_dir()
             .expect("Failed to get ~/.comrade/")
             .join(".comrade/");
-        let basepath = format!("{}{}", knife_home.join("packagelist/").display(), &program);
-        let dependencies = format!("{}{}", basepath, "/dependencies");
-        let language = format!("{}{}", basepath, "/language");
-        let repository = format!("{}{}", basepath, "/repository");
-        let capacity = format!("{}{}", basepath, "/capacity");
-        let version = format!("{}{}", basepath, "/version");
+        let basepath = knife_home.join("packagelist/").join(program);
+        let dependencies = basepath.join("dependencies");
+        let language = basepath.join("language");
+        let repository = basepath.join("repository");
+        let capacity = basepath.join("capacity");
+        let version = basepath.join("version");
 
         fn open_and_read_file<P: AsRef<Path>>(path: P, read: &str, get: &str) -> String {
             match File::open(path) {
@@ -59,7 +59,7 @@ impl Package {
         let depen: String = open_and_read_file(dependencies, "file", "dependencies");
 
         // get language
-        let lang: String = open_and_read_file(language.trim(), "language", "language");
+        let lang: String = open_and_read_file(language, "language", "language");
 
         // get repository
         let github: String = open_and_read_file(&repository, "repository", "repository");
@@ -212,7 +212,7 @@ impl Package {
             let pkg = program;
             let (lang, capa, ver, depen, github) = Package::get_package_infos(program);
             let exe = Package::download_get_execname(pkg).expect("Failed to get exec_name");
-            let exeit = knife_home.join("bin/").join(exe.clone());
+            let exeit = knife_home.join("bin/").join(&exe);
             if exeit.exists() && !source {
                 println!(
                     "{} {}",

@@ -90,15 +90,15 @@ impl Package {
                 rep = false;
                 ver = true;
                 continue;
-            } else if l.trim() == "" {
+            } else if l.trim().is_empty() {
                 continue;
             }
             if _install {
-                pkgname = l.clone();
+                pkgname = l;
             } else if rep {
-                repo = l.clone();
+                repo = l;
             } else if ver {
-                version = l.clone();
+                version = l;
             }
         }
         if pkgname == "Error" {
