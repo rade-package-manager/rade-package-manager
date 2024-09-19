@@ -5,9 +5,11 @@
 use chrono::{Datelike, Utc};
 use colored::Colorize;
 use dirs::home_dir;
-use std::fs;
-use std::io::{self, Write};
-use std::path::Path;
+use std::{
+    fs,
+    io::{self, Write},
+    path::Path,
+};
 
 pub struct Name<'a> {
     pub basedir: &'a Path,
@@ -48,7 +50,7 @@ impl<'a> Name<'a> {
         fis.write_all(url.as_bytes())?;
         Ok(())
     }
-    pub fn remove_program(&self, pkgname: &String) {
+    pub fn remove_program(&self, pkgname: &str) {
         let _name = self.basedir.join(pkgname);
         fs::remove_file(_name).expect("Failed to remove log");
     }
@@ -66,7 +68,7 @@ pub fn new() {
         let mut _str = String::new();
         io::stdin().read_line(&mut _str).unwrap();
         let _str = _str.trim();
-        if  ["y", "yes", ""].contains(&_str) {
+        if ["y", "yes", ""].contains(&_str) {
             println!("{} Start creating log...", ">>>".blue().bold());
             println!("{} Deleting status file...", ">>>".green().bold());
             fs::remove_file(

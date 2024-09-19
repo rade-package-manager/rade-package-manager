@@ -2,17 +2,15 @@
 // Copyright (c) 2024 17do
 // This software is licensed under the MIT License.
 
-#![allow(warnings)]
-use crate::install;
 use crate::Package;
 use colored::*;
 use dirs::home_dir;
 use git2::Repository;
 use reqwest::blocking;
-use std::env;
-use std::fs;
-use std::io;
-use std::io::Write;
+use std::{
+    fs,
+    io::{self, Write},
+};
 
 impl Package {
     /// ## update_package_list
@@ -83,7 +81,7 @@ pub fn upgrade_rade(knife_version: String) {
         .expect("Failed to get home directory")
         .join(".comrade/");
     let pkglist = rade_home.join("log/install/");
-    println!("");
+    println!();
     for entry in pkglist
         .read_dir()
         .expect("Failed to read log/install directory")
@@ -121,7 +119,7 @@ pub fn upgrade_rade(knife_version: String) {
             }
         }
     }
-    println!("");
+    println!();
 
     // Confirmation of the version available for pickup
     let upgrading_version = "https://17do.github.io/knife-installer.github.io/";
@@ -140,11 +138,11 @@ pub fn upgrade_rade(knife_version: String) {
         println!("Want to upgrade your comrade?");
         print!("[y/n] ");
         io::stdout().flush().unwrap();
-        let mut Sstr = String::new();
-        io::stdin().read_line(&mut Sstr).unwrap();
-        let Sstr: &str = Sstr.trim();
-        if Sstr == "y" || Sstr == "yes" || Sstr == "" {
-            let url: &str = "https://github.com/rade-package-manager/rade-package-manager";
+        let mut sstr = String::new();
+        io::stdin().read_line(&mut sstr).unwrap();
+        let sstr: &str = sstr.trim();
+        if ["y", "yes", ""].contains(&sstr) {
+            let _url: &str = "https://github.com/rade-package-manager/rade-package-manager";
             let home = match home_dir() {
                 Some(path) => path,
                 None => {
@@ -209,7 +207,7 @@ pub fn upgrade_rade(knife_version: String) {
 
                 std::process::exit(1);
             }
-            fs::remove_dir_all(
+            let _ = fs::remove_dir_all(
                 home_dir()
                     .expect("Failed to get home")
                     .join(".comrade/pakcagelist/.git"),
@@ -224,9 +222,8 @@ pub fn upgrade_rade(knife_version: String) {
                 println!("ok");
             } else {
                 eprintln!(
-                    "{}{}",
-                    ">>>".red().bold(),
-                    " Make failed. Please report this issue to the comrade repository"
+                    "{} Make failed. Please report this issue to the comrade repository",
+                    ">>>".red().bold()
                 );
                 std::process::exit(1);
             }

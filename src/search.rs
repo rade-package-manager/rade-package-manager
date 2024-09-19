@@ -6,7 +6,7 @@ use colored::*;
 use std::{ffi::OsStr, fs};
 
 // search package list
-pub fn search_program(program: &String) -> bool {
+pub fn search_program(program: &str) -> bool {
     let dir_path = dirs::home_dir()
         .expect("Failed to get home directory")
         .join(".comrade/packagelist");
@@ -30,7 +30,7 @@ pub fn search_program(program: &String) -> bool {
     let mut found: bool = false;
     let mut ret: bool = false;
     for entry in dir.flatten() {
-        if entry.file_name() == <String as AsRef<OsStr>>::as_ref(program) {
+        if entry.file_name() == <&str as AsRef<OsStr>>::as_ref(&program) {
             found = true;
             let target = entry.path();
             if target.is_dir() {
