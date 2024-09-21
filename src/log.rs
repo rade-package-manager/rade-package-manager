@@ -2,14 +2,43 @@
 // Copyright (c) 2024 17do
 // This software is licensed under the MIT License.
 
+#![allow(warnings)]
 use chrono::{Datelike, Utc};
 use colored::Colorize;
 use dirs::home_dir;
-use std::{
-    fs,
-    io::{self, Write},
-    path::Path,
-};
+use serde::{Deserialize, Serialize};
+use std::error::Error;
+use std::fs;
+use std::io::{self, Write};
+use std::path::Path;
+
+use crate::Package;
+
+#[derive(Serialize, Deserialize)]
+struct time {
+    utc_day: String,
+    utc_time: String,
+}
+#[derive(Serialize, Deserialize)]
+struct install {
+    install_name: String,
+}
+#[derive(Serialize, Deserialize)]
+struct info {
+    version: String,
+    repositry: String,
+}
+#[derive(Serialize, Deserialize)]
+struct Config {
+    time: time,
+    install: install,
+    info: info,
+}
+#[derive(Serialize, Deserialize)]
+struct ConfG {
+    time: time,
+    install: i64,
+}
 
 pub struct Name<'a> {
     pub basedir: &'a Path,
@@ -27,27 +56,37 @@ impl<'a> Name<'a> {
         package: &str,
         _install: &str,
         url: String,
-        version: String,
-    ) -> Result<(), std::io::Error> {
+        versi: String,
+    ) -> Result<(), Box<dyn Error>> {
         let _name = self.basedir.join(package);
         println!(
             "{} {}",
             "==>".bold().blue(),
             _name.display().to_string().as_str().bold()
         );
-        let mut fis = fs::File::create(&_name)?;
         let utc = Utc::now();
-        let data = format!("{}-{}-{}\n", utc.year(), utc.month(), utc.day());
-        let time = utc.time().format("%H:%M:%S").to_string();
-        fis.write_all("[time]\n".as_bytes())?;
-        fis.write_all(data.as_bytes())?;
-        fis.write_all(time.as_bytes())?;
-        fis.write_all("\n\n[install]\n".as_bytes())?;
-        fis.write_all(_install.as_bytes())?;
-        fis.write_all("\n\n[version]\n".as_bytes())?;
-        fis.write_all(version.as_bytes())?;
-        fis.write_all("\n\n[repositry]\n".as_bytes())?;
-        fis.write_all(url.as_bytes())?;
+        let data = format!("{}-{}-{}", utc.year(), utc.month(), utc.day());
+        let time_ = utc.time().format("%H:%M:%S").to_string();
+        let config = Config {
+            time: time {
+                utc_day: data,
+                utc_time: time_,
+            },
+            install: install {
+                install_name: _install.to_string(),
+            },
+            info: info {
+                version: versi,
+                repositry: url,
+            },
+        };
+        let toml_str = toml::to_string(&config)?;
+        let s = fs::read_to_string(Package::rade_home().join("log/status"))?;
+        let mut tml: ConfG = toml::from_str(&s)?;
+        tml.install += 1;
+        fs::write(&_name, toml_str)?;
+        let update_str = toml::to_string(&tml)?;
+        fs::write(Package::rade_home().join("log/status"), update_str)?;
         Ok(())
     }
     pub fn remove_program(&self, pkgname: &str) {
@@ -77,27 +116,19 @@ pub fn new() {
                     .join(".comrade/log/status"),
             )
             .expect("Failed to remove file");
-            println!("{} Start creating log...", ">>>".blue().bold());
-            let mut fl = fs::File::create(&ps).expect("Failed to create status file.");
             let utc = chrono::Utc::now();
-            let data = format!("utc: {}-{}-{}\n", utc.year(), utc.month(), utc.day());
-            let time = utc.time().format("%H:%M:%S").to_string();
-            let _install = "[install]\n\n";
-            let _status = "[status]\n";
-            let installed = "\ninstall: 0\n";
-            let time = format!("time: {}", time);
-            print!("{}", data.as_str().bold());
-            io::stdout().flush().unwrap();
-            println!("{}", time.as_str().bold());
+            let data = format!("{}-{}-{}", utc.year(), utc.month(), utc.day());
+            let time_ = utc.time().format("%H:%M:%S").to_string();
             println!("{} Create log status...", ">>>".green().bold());
-            fl.write_all(_install.as_bytes())
-                .expect("Failed to write log");
-            fl.write_all(_status.as_bytes())
-                .expect("Failed to write log");
-            fl.write_all(data.as_bytes()).expect("Failed to write log");
-            fl.write_all(time.as_bytes()).expect("Failed to write log");
-            fl.write_all(installed.as_bytes())
-                .expect("Failed to write log");
+            let config: ConfG = ConfG {
+                time: time {
+                    utc_day: data,
+                    utc_time: time_,
+                },
+                install: 0,
+            };
+            let toml = toml::to_string(&config).unwrap();
+            fs::write(&ps, toml).unwrap();
             println!("{}", "Log creation completed successfully".bold().cyan());
         } else {
             println!("Clearing the log has been canceled");
@@ -105,25 +136,76 @@ pub fn new() {
         }
     } else {
         println!("{} Start creating log...", ">>>".blue().bold());
-        let mut fl = fs::File::create(&ps).expect("Failed to create status file.");
         let utc = chrono::Utc::now();
-        let data = format!("utc: {}-{}-{}\n", utc.year(), utc.month(), utc.day());
-        let time = utc.time().format("%H:%M:%S").to_string();
-        let _status = "[status]\n";
-        let installed = "\ninstall: 0\n";
-        let time = format!("time: {}", time);
-        print!("{}", data.as_str().bold());
-        io::stdout().flush().unwrap();
-        println!("{}", time.as_str().bold());
+        let data = format!("{}-{}-{}", utc.year(), utc.month(), utc.day());
+        let time_ = utc.time().format("%H:%M:%S").to_string();
         println!("{} Create log status...", ">>>".green().bold());
-        fl.write_all(_status.as_bytes())
-            .expect("Failed to write log");
-        fl.write_all(data.as_bytes()).expect("Failed to write log");
-        fl.write_all(time.as_bytes()).expect("Failed to write log");
-        fl.write_all(installed.as_bytes())
-            .expect("Failed to write log");
+        let config: ConfG = ConfG {
+            time: time {
+                utc_day: data,
+                utc_time: time_,
+            },
+            install: 0,
+        };
+        let toml = toml::to_string(&config).unwrap();
+        fs::write(&ps, toml).unwrap();
         println!("{}", "Log creation completed successfully".bold().cyan());
     }
 }
 
-pub fn status() {}
+pub fn status() {
+    println!(
+        "{} {}",
+        ">>>".green().bold(),
+        "loading status file...".bold()
+    );
+    let (install, time_utc, utc_day) = parse_status();
+
+    let mut day_: Vec<&str> = utc_day.split('-').collect();
+    let lis = &[
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+    ];
+    let day1: usize = day_[1].parse().unwrap();
+    day_[1] = lis[day1 - 1];
+    println!(
+        "Using logs created in {}, {}, {}st, {}",
+        day_[0], day_[1], day_[2], time_utc
+    );
+    println!("Total number of installations {}", install);
+}
+
+/// return (install, time_utc, utc_day)
+pub fn parse_status() -> (String, String, String) {
+    let status_file = match fs::read_to_string(Package::rade_home().join("log/status")) {
+        Ok(o) => o,
+        Err(e) => {
+            eprintln!(
+                "{} {}",
+                ">>>".red().bold(),
+                "Failed to read status file".bold()
+            );
+            eprintln!("`rade log new` to create new log status.");
+            eprintln!("Error code: {}", e);
+            std::process::exit(1);
+        }
+    };
+
+    let toml: ConfG = toml::from_str(&status_file).unwrap();
+
+    (
+        toml.install.to_string(),
+        toml.time.utc_time,
+        toml.time.utc_day,
+    )
+}

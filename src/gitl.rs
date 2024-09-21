@@ -102,9 +102,9 @@ pub fn upgrade_rade(knife_version: String) {
             "Get the current latest version...".bold()
         );
         let pkginfo = Package::log_parse(entry);
-        let version = pkginfo.2;
+        let version = pkginfo.1;
         let npkginfo = Package::get_package_infos(entry);
-        let npkgv = npkginfo.2;
+        let npkgv = npkginfo.2; // new package version
         if version != npkgv {
             println!(
                 "{}: {} → {}",

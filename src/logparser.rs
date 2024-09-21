@@ -2,15 +2,38 @@
 // Copyright (c) 2024 17do
 // This software is licensed under the MIT License.
 
+#![allow(unused)]
+use crate::Package;
 use colored::*;
 use dirs::home_dir;
+use serde::Deserialize;
+use serde::Serialize;
 use std::ffi::OsStr;
 use std::{
     fs,
     io::{self, BufRead},
 };
 
-use crate::Package;
+#[derive(Debug, Deserialize)]
+struct Time {
+    utc_day: String,
+    utc_time: String,
+}
+#[derive(Deserialize, Debug)]
+struct Install {
+    install_name: String,
+}
+#[derive(Deserialize, Debug)]
+struct Info {
+    version: String,
+    repositry: String,
+}
+#[derive(Deserialize, Debug)]
+struct Config {
+    time: Time,
+    install: Install,
+    info: Info,
+}
 
 pub fn program_exists(packagename: &str) -> bool {
     let dir_path = dirs::home_dir()
@@ -66,62 +89,30 @@ impl Package {
             .join(".comrade/log/install/");
         let base = format!("{}{}", installdir.display(), &packagename);
         println!("{} {}", "==>".bold().blue(), &base.as_str().bold());
-        let mut _install = false;
-        let mut rep = false;
-        let mut ver = false;
-        let mut repo = "Error".to_string();
-        let mut pkgname = "Error".to_string();
-        let mut version = "Error".to_string();
-        for result in io::BufReader::new(fs::File::open(base).expect("Failed to open file")).lines()
-        {
-            let l = result.unwrap();
-            if l.trim() == "[repositry]" {
-                _install = false;
-                rep = true;
-                ver = false;
-                continue;
-            } else if l.trim() == "[install]" {
-                _install = true;
-                rep = false;
-                ver = false;
-                continue;
-            } else if l.trim() == "[version]" {
-                _install = false;
-                rep = false;
-                ver = true;
-                continue;
-            } else if l.trim().is_empty() {
-                continue;
+        let toml_file = match fs::read_to_string(base) {
+            Ok(o) => o,
+            Err(e) => {
+                eprintln!("Failed to read package log.");
+                eprintln!("Error code: {}", e);
+                e.to_string()
             }
-            if _install {
-                pkgname = l;
-            } else if rep {
-                repo = l;
-            } else if ver {
-                version = l;
+        };
+        let cofg: Config = match toml::from_str(&toml_file) {
+            Ok(cofg) => cofg,
+            Err(_) => {
+                eprintln!("{} {}", ">>>".red().bold(), "The log format is old.".bold());
+                eprintln!("The current rade log format is toml, but the log format on this computer is the past rade log format");
+                eprintln!("Run rm -rf ~/.comrade and reinstall rade");
+                eprintln!("{} {}","Note:".bold(),"This action will delete not only rade but all programs previously installed with rade.".red());
+                eprintln!("After accepting this, execute the previous command.");
+                std::process::exit(1);
             }
-        }
-        if pkgname == "Error" {
-            eprintln!(
-                "{} {}",
-                ">>>".red().bold(),
-                "Failed to load executable file name".bold()
-            );
-            eprintln!("Please report this issue to the comrade repository");
-            std::process::exit(1);
-        }
-        if repo == "Error" {
-            eprintln!(
-                "{} {}",
-                ">>>".red().bold(),
-                "Failed to load repositry url".bold()
-            );
-            eprintln!("Please report this issue to the comrade repository");
-            std::process::exit(1);
-        }
-        if version == "Error" {
-            version = "Unable to output version due to old package".to_string();
-        }
-        (pkgname.trim().to_string(), repo, version)
+        };
+
+        (
+            cofg.install.install_name,
+            cofg.info.version,
+            cofg.info.repositry,
+        )
     }
 }
