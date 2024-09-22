@@ -14,4 +14,3 @@ zip = "0.6"
 indicatif = "0.17.8"
 toml = "0.8.19"
 serde = { version = "1.0.210", features = ["derive"] }
-serde_yaml = "0.9.34"

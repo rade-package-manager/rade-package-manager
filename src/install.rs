@@ -87,6 +87,7 @@ impl Package {
     /// ```
     ///
     pub fn install(program: &str, source: bool, build: bool) {
+        let _ = build;
         let search_ = search::search_program(program);
         let knife_home = home_dir()
             .expect("Failed to get ~/.comrade/")
@@ -202,7 +203,7 @@ impl Package {
             }
         } else if download {
             let pkg = program;
-            let (lang, capa, ver, depen, github, download) = Package::get_package_infos(program);
+            let (lang, capa, ver, depen, github, _download) = Package::get_package_infos(program);
             let exe = Package::download_get_execname(pkg).expect("Failed to get exec_name");
             let exeit = knife_home.join("bin/").join(&exe);
             if exeit.exists() && !source {

@@ -2,21 +2,18 @@
 // Copyright (c) 2024 17do
 // This software is licensed under the MIT License.
 
-#![allow(unused)]
 use crate::Package;
 use colored::*;
 use dirs::home_dir;
 use serde::Deserialize;
-use serde::Serialize;
 use std::ffi::OsStr;
-use std::{
-    fs,
-    io::{self, BufRead},
-};
+use std::fs;
 
 #[derive(Debug, Deserialize)]
 struct Time {
+    #[allow(unused)]
     utc_day: String,
+    #[allow(unused)]
     utc_time: String,
 }
 #[derive(Deserialize, Debug)]
@@ -30,6 +27,7 @@ struct Info {
 }
 #[derive(Deserialize, Debug)]
 struct Config {
+    #[allow(unused)]
     time: Time,
     install: Install,
     info: Info,
