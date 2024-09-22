@@ -2,7 +2,6 @@
 // Copyright (c) 2024 17do
 // This software is licensed under the MIT License.
 
-#![allow(warnings)]
 use chrono::{Datelike, Utc};
 use colored::Colorize;
 use dirs::home_dir;
@@ -15,28 +14,28 @@ use std::path::Path;
 use crate::Package;
 
 #[derive(Serialize, Deserialize)]
-struct time {
+struct Time {
     utc_day: String,
     utc_time: String,
 }
 #[derive(Serialize, Deserialize)]
-struct install {
+struct Install {
     install_name: String,
 }
 #[derive(Serialize, Deserialize)]
-struct info {
+struct Info {
     version: String,
     repositry: String,
 }
 #[derive(Serialize, Deserialize)]
 struct Config {
-    time: time,
-    install: install,
-    info: info,
+    time: Time,
+    install: Install,
+    info: Info,
 }
 #[derive(Serialize, Deserialize)]
 struct ConfG {
-    time: time,
+    time: Time,
     install: i64,
 }
 
@@ -68,14 +67,14 @@ impl<'a> Name<'a> {
         let data = format!("{}-{}-{}", utc.year(), utc.month(), utc.day());
         let time_ = utc.time().format("%H:%M:%S").to_string();
         let config = Config {
-            time: time {
+            time: Time {
                 utc_day: data,
                 utc_time: time_,
             },
-            install: install {
+            install: Install {
                 install_name: _install.to_string(),
             },
-            info: info {
+            info: Info {
                 version: versi,
                 repositry: url,
             },
@@ -121,7 +120,7 @@ pub fn new() {
             let time_ = utc.time().format("%H:%M:%S").to_string();
             println!("{} Create log status...", ">>>".green().bold());
             let config: ConfG = ConfG {
-                time: time {
+                time: Time {
                     utc_day: data,
                     utc_time: time_,
                 },
@@ -141,7 +140,7 @@ pub fn new() {
         let time_ = utc.time().format("%H:%M:%S").to_string();
         println!("{} Create log status...", ">>>".green().bold());
         let config: ConfG = ConfG {
-            time: time {
+            time: Time {
                 utc_day: data,
                 utc_time: time_,
             },
