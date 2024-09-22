@@ -27,7 +27,7 @@ impl Package {
                 .expect("Failed to get home dir")
                 .join(".comrade/");
 
-            let (name, repo, version) = Package::log_parse(package);
+            let (name, version, repo) = Package::log_parse(package);
             let bytes = format!("{}{}", base.join("bin/").display(), &name);
             let bytes = fs::metadata(bytes).expect("Failed to get metadata").len();
             let mut _str = String::new();
@@ -40,7 +40,7 @@ impl Package {
                     &name.as_str().bold()
                 );
                 println!("{}{}", "version: ".bold(), version);
-                println!("Repositry: {}\n", repo.as_str().bold());
+                println!("Repository: {}\n", repo.as_str().bold());
                 println!("Do you really want to delete {}?", &package);
                 print!("[y/n] ");
                 io::stdout().flush().unwrap();

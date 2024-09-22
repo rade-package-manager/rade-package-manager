@@ -8,12 +8,22 @@ use crate::{
 use colored::*;
 use dirs::home_dir;
 use git2::Repository;
+use serde::{Deserialize, Serialize};
 use std::{
     fs::{self, File},
     io::{self, Read, Write},
     path::Path,
     process::{self},
 };
+#[derive(Debug, Deserialize, Serialize)]
+struct PackageInfo {
+    dependencies: String,
+    language: String,
+    repository: String,
+    capacity: i64,
+    version: String,
+    download: bool,
+}
 
 impl Package {
     /// ## get_package_infos
@@ -22,23 +32,19 @@ impl Package {
     /// this function is return the dependencies, capacity, version, repository, and language.
     /// this function returnd taple
     /// ```rust
-    /// (String, String, String, String, String)
+    /// (String, String, String, String, String, bool)
     /// ```
     /// and return list is
     /// ```rust
     /// (language, capacity, version, dependencies, repository)
     /// ```
-    pub fn get_package_infos(program: &str) -> (String, String, String, String, String) {
+    pub fn get_package_infos(program: &str) -> (String, String, String, String, String, bool) {
         let knife_home = home_dir()
             .expect("Failed to get ~/.comrade/")
             .join(".comrade/");
         let basepath = knife_home.join("packagelist/").join(program);
-        let dependencies = basepath.join("dependencies");
-        let language = basepath.join("language");
-        let repository = basepath.join("repository");
-        let capacity = basepath.join("capacity");
-        let version = basepath.join("version");
-
+        let package = format!("{}/package.toml", basepath.display());
+        println!("pkg: {}", package);
         fn open_and_read_file<P: AsRef<Path>>(path: P, read: &str, get: &str) -> String {
             match File::open(path) {
                 Ok(mut f) => {
@@ -56,28 +62,18 @@ impl Package {
             }
         }
 
-        let depen: String = open_and_read_file(dependencies, "file", "dependencies");
+        let package_info = open_and_read_file(package, "package info", "packageinfo");
 
-        // get language
-        let lang: String = open_and_read_file(language, "language", "language");
+        let package_info: PackageInfo =
+            toml::from_str(&package_info).unwrap_or_else(|_| panic!("failed to parse toml"));
 
-        // get repository
-        let github: String = open_and_read_file(&repository, "repository", "repository");
-
-        let capa: String = open_and_read_file(capacity, "capacity", "capacity");
-
-        let ver: String = open_and_read_file(version, "version", "version");
-        let lang = lang.trim();
-        let capa = capa.trim();
-        let ver = ver.trim();
-        let depen = depen.trim();
-        let github = github.trim();
         (
-            lang.to_string(),
-            capa.to_string(),
-            ver.to_string(),
-            depen.to_string(),
-            github.to_string(),
+            package_info.language,
+            package_info.capacity.to_string(),
+            package_info.version,
+            package_info.dependencies,
+            package_info.repository,
+            package_info.download,
         )
     }
     /// ## install
@@ -93,14 +89,11 @@ impl Package {
     pub fn install(program: &str, source: bool, build: bool) {
         let search_ = search::search_program(program);
         let mut download = false;
-        if !build {
-            download = Package::is_download_package(program).unwrap();
-        }
         let knife_home = home_dir()
             .expect("Failed to get ~/.comrade/")
             .join(".comrade/");
+        let (lang, capa, ver, depen, github) = Package::get_package_infos(program);
         if search_ && !download {
-            let (lang, capa, ver, depen, github) = Package::get_package_infos(program);
             if home_dir()
                 .expect("failed to get home")
                 .join(".comrade/build")
@@ -266,10 +259,7 @@ pub fn get_program_name(build_dir: String, program: &str) -> String {
     if !exe_name.exists() {
         return program.to_string();
     }
-    // 一時的に入れるだけ
     let mut str = String::new();
-    // filはファイル
-    //
     if let Ok(mut fl) = fs::File::open(&exe_name) {
         fl.read_to_string(&mut str).expect("failed to read file");
         return str.trim().to_string();
