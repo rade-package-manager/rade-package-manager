@@ -70,7 +70,7 @@ impl Package {
         progress_bar.set_style(
             ProgressStyle::default_bar()
                 .template("[{bar:40.cyan/blue}] {bytes}/{total_bytes} ({eta})")?
-                .progress_chars("###"),
+                .progress_chars("#>-"),
         );
 
         let mut downloaded: u64 = 0;
