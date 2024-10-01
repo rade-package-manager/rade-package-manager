@@ -86,7 +86,6 @@ impl Package {
             .expect("Failed to get home dir")
             .join(".comrade/log/install/");
         let base = format!("{}{}", installdir.display(), &packagename);
-        println!("{} {}", "==>".bold().blue(), &base.as_str().bold());
         let toml_file = match fs::read_to_string(base) {
             Ok(o) => o,
             Err(e) => {

@@ -58,11 +58,6 @@ impl<'a> Name<'a> {
         versi: String,
     ) -> Result<(), Box<dyn Error>> {
         let _name = self.basedir.join(package);
-        println!(
-            "{} {}",
-            "==>".bold().blue(),
-            _name.display().to_string().as_str().bold()
-        );
         let utc = Utc::now();
         let data = format!("{}-{}-{}", utc.year(), utc.month(), utc.day());
         let time_ = utc.time().format("%H:%M:%S").to_string();

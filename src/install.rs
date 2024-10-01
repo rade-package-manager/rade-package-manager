@@ -2,9 +2,7 @@
 // Copyright (c) 2024 17do
 // This software is licensed under the MIT License.
 
-use crate::{
-    log, Package, {install, search},
-};
+use crate::{install, log, search, Package};
 use colored::*;
 use dirs::home_dir;
 use git2::Repository;
@@ -13,11 +11,11 @@ use std::{
     fs::{self, File},
     io::{self, Read, Write},
     path::Path,
-    process::{self},
+    process::{self, Command, ExitStatus},
 };
 #[derive(Debug, Deserialize, Serialize)]
 struct PackageInfo {
-    dependencies: String,
+    dependencies: Vec<String>,
     language: String,
     repository: String,
     capacity: i64,
@@ -38,13 +36,12 @@ impl Package {
     /// ```rust
     /// (language, capacity, version, dependencies, repository)
     /// ```
-    pub fn get_package_infos(program: &str) -> (String, String, String, String, String, bool) {
+    pub fn get_package_infos(program: &str) -> (String, String, String, Vec<String>, String, bool) {
         let knife_home = home_dir()
             .expect("Failed to get ~/.comrade/")
             .join(".comrade/");
         let basepath = knife_home.join("packagelist/").join(program);
         let package = format!("{}/package.toml", basepath.display());
-        println!("pkg: {}", package);
         fn open_and_read_file<P: AsRef<Path>>(path: P, read: &str, get: &str) -> String {
             match File::open(path) {
                 Ok(mut f) => {
@@ -93,7 +90,7 @@ impl Package {
             .expect("Failed to get ~/.comrade/")
             .join(".comrade/");
         let (lang, capa, ver, depen, github, download) = Package::get_package_infos(program);
-        if search_ && !download {
+        if search_ && !download || download && build {
             if home_dir()
                 .expect("failed to get home")
                 .join(".comrade/build")
@@ -134,17 +131,12 @@ impl Package {
                 fs::remove_dir_all(knife_home.join("build/")).expect("Failed to remove dir");
                 std::process::exit(1);
             }
-            let depen = if depen.is_empty() {
-                "None"
-            } else {
-                depen.as_str()
-            };
             println!("{} {}", "install package:".bold(), program);
             println!("{} {}", "executable file name:".bold(), exe);
             println!("{} {}bytes", "capacity:".bold(), capa);
             println!("{} {}", "language:".bold(), lang);
             println!("{} {}", "versions:".bold(), ver);
-            println!("{} {}", "dependencies:".bold(), depen);
+            println!("{} {:?}", "dependencies:".bold(), depen);
             println!("{} {}", "repository:".bold(), github);
             let mut tmp = String::new();
             let mut ok_ = "yes";
@@ -156,8 +148,15 @@ impl Package {
                 ok_ = tmp.trim();
             }
             if ["y", "yes", ""].contains(&ok_) {
-                // start Installation
+                // Start Installation
                 println!("{} {}", ">>>".green().bold(), "Start Installation".bold());
+                // install dependence
+                if !depen.is_empty() {
+                    println!("Installing Dependencies");
+                    depen
+                        .into_iter()
+                        .for_each(|d| Package::install_for_dependence(&d, true));
+                }
                 println!("{} run install.sh (build start)", ">>>".yellow().bold());
 
                 let status_installsh = process::Command::new("sh")
@@ -173,17 +172,11 @@ impl Package {
                     std::process::exit(1);
                 }
                 println!("{} {}", ">>>".cyan().bold(), "build end".bold());
-                println!("{} {}", ">>>".green().bold(), "moving file...".bold());
                 fs::rename(
                     knife_home.join("build/").join(&exe),
                     knife_home.join("bin/").join(&exe),
                 )
                 .expect("Failed to move file");
-                println!(
-                    "{} {}",
-                    ">>>".green().bold(),
-                    "remove build directory...".bold()
-                );
                 fs::remove_dir_all(knife_home.join("build/")).expect("Failed to remove dir");
                 println!("{} {}", ">>>".green().bold(), "Fill in the log...".bold());
                 let _ = log::Name::new(&knife_home.join("log/install/")).create(
@@ -223,7 +216,7 @@ impl Package {
             println!("{} {}bytes", "capacity:".bold(), capa);
             println!("{} {}", "language:".bold(), lang);
             println!("{} {}", "versions:".bold(), ver);
-            println!("{} {}", "dependencies:".bold(), depen);
+            println!("{} {:?}", "dependencies:".bold(), depen);
             println!("{} {}", "repository:".bold(), github);
             let mut tmp = String::new();
             let mut ok_ = "yes";
@@ -235,6 +228,13 @@ impl Package {
                 ok_ = tmp.trim();
             }
             if ["y", "yes", ""].contains(&ok_) {
+                // install dependence
+                if !depen.is_empty() {
+                    println!("Installing Dependencies");
+                    depen
+                        .into_iter()
+                        .for_each(|d| Package::install_for_dependence(&d, true));
+                }
                 let archive = Package::download_install(program);
                 let _ = Package::unpack_package(archive.unwrap(), program);
                 println!("{} {}", ">>>".green().bold(), "Fill in the log...".bold());
@@ -249,6 +249,163 @@ impl Package {
             } else {
                 return;
             }
+        }
+    }
+    pub fn install_for_dependence(program: &str, build: bool) {
+        let _ = build;
+        let search_ = search::search_program(program);
+        let knife_home = home_dir()
+            .expect("Failed to get ~/.comrade/")
+            .join(".comrade/");
+        let (_lang, _capa, ver, depen, github, download) = Package::get_package_infos(program);
+        if search_ && !download || download && build {
+            if knife_home.join("build/").join(program).exists() {
+                fs::remove_dir_all(knife_home.join("build/").join(program)).unwrap();
+            }
+            let _ = fs::create_dir_all(knife_home.join("build/").join(program)).unwrap();
+
+            println!("{} {}", ">>>".green().bold(), "Clone package...".bold());
+            if let Err(e) = Repository::clone(&github, knife_home.join("build/").join(program)) {
+                eprintln!("\n{}: Failed to Clone Repository.", "Error".red());
+                eprintln!("Please report this issue to the comrade repository");
+                eprintln!("Error code: {}", e);
+                std::process::exit(1);
+            }
+            let exe = install::get_program_name(
+                knife_home
+                    .join("build/")
+                    .join(program)
+                    .display()
+                    .to_string(),
+                program,
+            );
+            let mut _cmd: ExitStatus;
+            if cfg!(target_os = "windows") {
+                _cmd = Command::new("where")
+                    .arg(&exe)
+                    .stderr(process::Stdio::null())
+                    .stdout(process::Stdio::null())
+                    .status()
+                    .expect("Failed to which");
+            } else {
+                _cmd = Command::new("which")
+                    .arg(&exe)
+                    .stderr(process::Stdio::null())
+                    .stdout(process::Stdio::null())
+                    .status()
+                    .expect("Failed to which");
+            }
+            let mut installed = false;
+            if _cmd.success() {
+                println!(
+                    "{} {}",
+                    ">>>".red().bold(),
+                    "The program is already installed!".bold()
+                );
+                fs::remove_dir_all(knife_home.join("build/").join(program))
+                    .expect("Failed to remove dir");
+                installed = true
+            }
+            if !installed {
+                println!("install package: {}", program);
+                println!("dependencies: {:?}", depen);
+                // install dependence
+                if !depen.is_empty() && depen[0] != "" {
+                    println!(
+                        "{} {}",
+                        ">>>".green().bold(),
+                        "Install Dependencies...".bold()
+                    );
+                    let _ = depen
+                        .into_iter()
+                        .for_each(|d| Package::install_for_dependence(&d, true));
+                }
+                println!("{} run install.sh (build start)", ">>>".yellow().bold());
+                let progmr = format!(
+                    "{}{}",
+                    knife_home.join("build/").join(program).display(),
+                    "/install.sh"
+                );
+                let status_installsh = process::Command::new("sh")
+                    .arg(progmr)
+                    .current_dir(knife_home.join("build").join(program))
+                    .status()
+                    .expect("Failed to start install.sh");
+                if !status_installsh.success() {
+                    println!(
+                    "\n{} install.sh failed. Please report this problem to the comrade repository",
+                    ">>>".red().bold()
+                );
+                    std::process::exit(1);
+                }
+                println!("{} {}", ">>>".cyan().bold(), "build end".bold());
+                fs::rename(
+                    knife_home.join("build/").join(program).join(&exe),
+                    knife_home.join("bin/").join(&exe),
+                )
+                .expect("Failed to move file");
+                fs::remove_dir_all(knife_home.join("build/")).expect("Failed to remove dir");
+                println!("{} {}", ">>>".green().bold(), "Fill in the log...".bold());
+                let _ = log::Name::new(&knife_home.join("log/install/")).create(
+                    program,
+                    exe.as_str(),
+                    github.to_string(),
+                    ver.to_string(),
+                );
+            } else {
+                return;
+            }
+        } else if download {
+            let pkg = program;
+            let (_lang, _capa, ver, depen, github, _download) = Package::get_package_infos(program);
+            let exe = Package::download_get_execname(pkg).expect("Failed to get exec_name");
+            let _exeit = knife_home.join("bin/").join(&exe);
+            let mut _cmd = Command::new("").status().unwrap();
+            if cfg!(target_os = "windows") {
+                _cmd = Command::new("where")
+                    .arg(&exe)
+                    .stderr(process::Stdio::null())
+                    .stdout(process::Stdio::null())
+                    .status()
+                    .expect("Failed to execute where");
+            } else {
+                _cmd = Command::new("which")
+                    .arg(&exe)
+                    .stderr(process::Stdio::null())
+                    .stdout(process::Stdio::null())
+                    .status()
+                    .expect("Failed to execute which");
+            }
+
+            if _cmd.success() {
+                println!(
+                    "{} {}",
+                    ">>>".red().bold(),
+                    "The program is already installed!".bold()
+                );
+            }
+            println!("{} {}", "install package:", program);
+            println!("{} {:?}", "dependencies:", depen);
+            // install dependence
+            if !depen.is_empty() {
+                println!("Installing Dependencies");
+                depen
+                    .into_iter()
+                    .for_each(|d| Package::install_for_dependence(&d, true));
+            }
+            let archive = Package::download_install(program);
+            let _ = Package::unpack_package(archive.unwrap(), program);
+            println!("{} {}", ">>>".green().bold(), "Fill in the log...".bold());
+            let _ = log::Name::new(&knife_home.join("log/install")).create(
+                program,
+                Package::download_get_execname(pkg)
+                    .expect("Failed to get exec_name")
+                    .as_str(),
+                github.to_string(),
+                ver.to_string(),
+            );
+        } else {
+            return;
         }
     }
 }
